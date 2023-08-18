@@ -51,12 +51,16 @@ export default function InspectionCalendar() {
 
   useEffect(() => {
     const body = document.querySelector("body");
-    if (showFilterModal || showAddInspectionModal) {
-      body.style.overflow = "hidden"; // Disable scrolling
-    } else {
-      body.style.overflow = "auto"; // Enable scrolling
+
+    if (body) {
+      // null check added here
+      if (showFilterModal || showAddInspectionModal) {
+        body.style.overflow = "hidden"; // Disable scrolling
+      } else {
+        body.style.overflow = "auto"; // Enable scrolling
+      }
     }
-  }, [showAddInspectionModal, showFilterModal]);
+  }, [showFilterModal, showAddInspectionModal]);
 
   const preInspectionData = {
     labels: ["Rescheduled", "Cancelled", "Random", "Approved/Additional"],
@@ -363,7 +367,7 @@ export default function InspectionCalendar() {
                 </button>
               </div>
             </div>
-            <div className="overflow-x-auto w-full h-full bg-white border border-[#D5D7D8] rounded-[10px]">
+            <div className="overflow-x-auto lg:overflow-x-hidden w-full h-full bg-white border border-[#D5D7D8] rounded-[10px]">
               <div className="min-w-[1068.8px] grid grid-cols-12 border-b border-[#BDBDBD] p-6">
                 <h3 className="col-span-1 font-monts font-semibold text-sm text-start text-[#5C5C5C] px-4 pl-0">
                   Inspection Date

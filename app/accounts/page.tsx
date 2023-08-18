@@ -9,50 +9,57 @@ import { Pie } from "react-chartjs-2";
 import { RiArrowDownSFill, RiSearchLine } from "react-icons/ri";
 import { BsFunnel, BsX, BsPlusLg } from "react-icons/bs";
 import AddNewAccount from "@/components/Modals/Accounts/AddNewAccount";
+import ManageAccount from "@/components/Modals/Accounts/ManageAccount";
+import DeleteAccount from "@/components/Modals/Accounts/DeleteAccount";
 ChartJS.register(ArcElement);
 
 export default function Accounts() {
-  const [showModal, setShowModal] = useState(false);
   const [showAddNewAccountModal, setShowAddNewAccountModal] = useState(false);
+  const [showManageAccountModal, setShowManageAccountModal] = useState(false);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleButtonClick = () => {
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-  };
 
   useEffect(() => {
     const body = document.querySelector("body");
-    if (showModal) {
-      body.style.overflow = "hidden"; // Disable scrolling
-    } else {
-      body.style.overflow = "auto"; // Enable scrolling
+    if (body) {
+      // null check added here
+      if (showAddNewAccountModal || showManageAccountModal || showDeleteAccountModal) {
+        body.style.overflow = "hidden"; // Disable scrolling
+      } else {
+        body.style.overflow = "auto"; // Enable scrolling
+      }
     }
-  }, [showModal]);
-
-  const data = {
-    labels: ["Accomplished", "Missed", "Target"],
-    datasets: [
-      {
-        data: [11, 1, 12],
-        backgroundColor: ["#4F925A", "#973C3C", "#404040"],
-        hoverBackgroundColor: ["#4F925A", "#973C3C", "#404040"],
-      },
-    ],
-  };
-
-  const options = {
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
+  }, []);
 
   const inspections: any[] = [
+    {
+      name: "Kobe Sergio",
+      email: "ckasergio@gmail.com",
+      password: "**************",
+      accountType: "RO",
+      lastLoggedIn: "5/21/2023",
+    },
+    {
+      name: "Michelle Pantoja",
+      email: "mmapantoja@gmail.com",
+      password: "**************",
+      accountType: "RO",
+      lastLoggedIn: "5/21/2023",
+    },
+    {
+      name: "Kobe Sergio",
+      email: "ckasergio@gmail.com",
+      password: "**************",
+      accountType: "RO",
+      lastLoggedIn: "5/21/2023",
+    },
+    {
+      name: "Michelle Pantoja",
+      email: "mmapantoja@gmail.com",
+      password: "**************",
+      accountType: "RO",
+      lastLoggedIn: "5/21/2023",
+    },
     {
       name: "Kobe Sergio",
       email: "ckasergio@gmail.com",
@@ -78,6 +85,24 @@ export default function Accounts() {
     }, 2000);
   };
 
+  const handleSubmitManageAccountModal = () => {
+    setIsLoading(true);
+
+    setTimeout(() => {
+      setShowManageAccountModal(false);
+      setIsLoading(false);
+    }, 2000);
+  };
+
+  const handleSubmitDeleteAccountModal = () => {
+    setIsLoading(true);
+
+    setTimeout(() => {
+      setShowDeleteAccountModal(false);
+      setIsLoading(false);
+    }, 2000);
+  };
+
   return (
     <>
       <AddNewAccount
@@ -85,6 +110,18 @@ export default function Accounts() {
         setter={setShowAddNewAccountModal}
         isLoading={isLoading}
         onSubmit={handleSubmitAddNewAccountModal}
+      />
+      <ManageAccount
+        isOpen={showManageAccountModal}
+        setter={setShowManageAccountModal}
+        isLoading={isLoading}
+        onSubmit={handleSubmitManageAccountModal}
+      />
+      <DeleteAccount
+        isOpen={showDeleteAccountModal}
+        setter={setShowDeleteAccountModal}
+        isLoading={isLoading}
+        onSubmit={handleSubmitDeleteAccountModal}
       />
       <div className="min-h-[75vh] flex flex-col lg:flex-row gap-5">
         <aside className="w-full lg:w-1/4">
@@ -144,7 +181,7 @@ export default function Accounts() {
               </button>
             </div>
           </div>
-          <div className="overflow-x-auto w-full h-full bg-white border border-[#D5D7D8] rounded-[10px]">
+          <div className="overflow-x-auto lg:overflow-x-hidden w-full h-full bg-white border border-[#D5D7D8] rounded-[10px]">
             <div className="min-w-[1068.8px] grid grid-cols-12 border-b border-[#BDBDBD] p-6">
               <h3 className="col-span-5 font-monts font-semibold text-sm text-start text-[#5C5C5C] px-4 pl-0">
                 Account Credentials
@@ -157,9 +194,9 @@ export default function Accounts() {
               </h3>
               <h3 className="col-span-2 font-monts font-semibold text-sm text-start text-[#5C5C5C] px-4"></h3>
             </div>
-            <div className="lg:overflow-y-auto w-full max-h-[25rem]">
+            <div className="lg:overflow-y-auto w-full max-h-[28rem]">
               {inspections.length == 0 ? (
-                <div>
+                <div className="min-h-full flex justify-center items-center p-44">
                   <h3 className="font-monts font-medium text-base text-center text-darkerGray">
                     There are no items to display.
                   </h3>
@@ -193,10 +230,13 @@ export default function Accounts() {
                         {row.lastLoggedIn}
                       </h3>
                       <div className="col-span-2 flex justify-between font-monts font-semibold text-sm text-start text-darkerGray px-4">
-                        <h3 className="font-monts font-semibold text-sm text-primaryBlue">
+                        <h3
+                          onClick={() => setShowManageAccountModal(true)}
+                          className="font-monts font-semibold text-sm text-primaryBlue cursor-pointer"
+                        >
                           Manage
                         </h3>
-                        <h3 className="font-monts font-semibold text-sm text-[#DB1131]">
+                        <h3 onClick={() => setShowDeleteAccountModal(true)} className="font-monts font-semibold text-sm text-[#DB1131] cursor-pointer">
                           Delete
                         </h3>
                       </div>

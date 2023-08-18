@@ -3,13 +3,7 @@ import React, { useEffect, useState } from "react";
 import { BsPencil, BsX } from "react-icons/bs";
 import { RiArrowDownSFill, RiSearchLine } from "react-icons/ri";
 
-// import Firebase from "@/lib/firebase";
-// import { RO } from "@/types/RO";
-// import { Client } from "@/types/Client";
-// import { Inspection } from "@/types/Inspection";
-// const firebase = new Firebase();
-
-export default function AddNewAccount({ isOpen, setter, isLoading, onSubmit }: any) {
+export default function ManageInspection({ isOpen, setter, isLoading, onSubmit }: any) {
 
   if (isOpen === false) {
     return <></>;
@@ -31,7 +25,7 @@ export default function AddNewAccount({ isOpen, setter, isLoading, onSubmit }: a
             {/*header*/}
             <div className="flex items-center justify-between px-4 py-2 border-b border-solid bg-[#F4F6FA] border-slate-200 rounded-t-[8px]">
               <h5 className="font-monts font-bold text-sm text-darkerGray">
-                Add New Account
+                Manage Account
               </h5>
               <BsX
                 className="flex w-4 h-4 object-contain cursor-pointer"
@@ -113,10 +107,10 @@ export default function AddNewAccount({ isOpen, setter, isLoading, onSubmit }: a
               >
                 {isLoading ? (
                   <div className="flex">
-                    <Spinner /> Adding new account...
+                    <Spinner /> Updating account...
                   </div>
                 ) : (
-                  "Add"
+                  "Update"
                 )}
               </button>
             </div>

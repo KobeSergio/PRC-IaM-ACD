@@ -31,10 +31,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     const body = document.querySelector("body");
-    if (showFilterModal) {
-      body.style.overflow = "hidden"; // Disable scrolling
-    } else {
-      body.style.overflow = "auto"; // Enable scrolling
+    if (body) {
+      // null check added here
+      if (showFilterModal) {
+        body.style.overflow = "hidden"; // Disable scrolling
+      } else {
+        body.style.overflow = "auto"; // Enable scrolling
+      }
     }
   }, [showFilterModal]);
 
@@ -145,7 +148,7 @@ export default function Dashboard() {
           <Sidebar />
         </aside>
         {showCalendar ? (
-          <div className="w-full flex flex-col gap-5">
+          <div className="w-3/4 flex flex-col gap-5">
             <div className="flex flex-col lg:flex-row gap-3 lg:gap-0 justify-between">
               <div className="w-full flex flex-row gap-3">
                 <div className="relative">
@@ -338,7 +341,7 @@ export default function Dashboard() {
                 </button>
               </div>
             </div>
-            <div className="overflow-x-auto w-full h-full bg-white border border-[#D5D7D8] rounded-[10px]">
+            <div className="overflow-x-auto lg:overflow-x-hidden w-full h-full bg-white border border-[#D5D7D8] rounded-[10px]">
               <div className="min-w-[1068.8px] grid grid-cols-12 border-b border-[#BDBDBD] p-6">
                 <h3 className="col-span-1 font-monts font-semibold text-sm text-start text-[#5C5C5C] px-4 pl-0">
                   Inspection Date
@@ -365,7 +368,7 @@ export default function Dashboard() {
 
               <div className="lg:overflow-y-auto w-full max-h-[25rem]">
                 {inspections.length == 0 ? (
-                  <div>
+                  <div className="min-h-full flex justify-center items-center p-44">
                     <h3 className="font-monts font-medium text-base text-center text-darkerGray">
                       There are no items to display.
                     </h3>
