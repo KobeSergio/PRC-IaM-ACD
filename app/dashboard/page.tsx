@@ -16,9 +16,6 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
 
-  const handleCloseFilterModal = () => {
-    setShowFilterModal(false);
-  };
   const handleSubmitFilterModal = () => {
     //insert logic here
     setIsLoading(true);
@@ -139,7 +136,7 @@ export default function Dashboard() {
     <>
       <FilterModal
         isOpen={showFilterModal}
-        setter={handleCloseFilterModal}
+        setter={() => setShowFilterModal(false)}
         isLoading={isLoading}
         onSubmit={handleSubmitFilterModal}
       />

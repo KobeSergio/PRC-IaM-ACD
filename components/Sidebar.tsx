@@ -1,5 +1,6 @@
 "use client";
 
+import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -87,13 +88,16 @@ export default function Sidebar() {
             </Link>
           );
         })}
-        <Link
-          href="/"
+        <div
+          onClick={async () => {
+            await signOut();
+            window.location.href = "/";
+          }}
           className="flex items-center pl-4 pr-2 py-3 font-monts font-semibold text-sm rounded-[10px] cursor-pointer text-darkGray hover:bg-lightestGray"
         >
           <BsBoxArrowInLeft />
           <span className="ml-3">Logout</span>
-        </Link>
+        </div>
       </div>
     </div>
   );

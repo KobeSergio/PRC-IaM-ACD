@@ -3,19 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-// import { signIn, signOut, useSession, getProviders } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 export default function Nav() {
-  const [toggle, setToggle] = useState(false);
-  const isLoggedIn = true;
-  const [providers, setProviders] = useState(null);
-
-  //   useEffect(() => {
-  //     (async () => {
-  //       const res = await getProviders();
-  //       setProviders(res);
-  //     })();
-  //   }, []);
+  const { data } = useSession();
 
   return (
     <nav className="w-full relative z-40 bg-white shadow">
@@ -37,7 +28,7 @@ export default function Nav() {
           </div>
         </div>
         <h3 className="font-monts font-semibold text-base text-darkerGray">
-          ACD 1
+          {data?.user?.name}
         </h3>
       </div>
     </nav>
