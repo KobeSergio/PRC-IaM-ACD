@@ -79,6 +79,23 @@ export default class Firebase {
     }
   }
 
+  //GET: Get all user accounts (PRB, RO, OC).
+  //Returns user list if successful, [] if there is an error.
+  async getAllUsers() {
+    try {
+      const userPromises = [
+        this.getAllPRBs(),
+        this.getAllROs(),
+        this.getAllOCs(),
+      ];
+      const [prb, ro, oc] = await Promise.all(userPromises);
+      return { PRB: prb, RO: ro, OC: oc } as any;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
+
   //GET: Get all clients.
   //Returns ro list if successful, [] if there is an error.
   async getAllClients() {
@@ -282,6 +299,42 @@ export default class Firebase {
     }
   }
 
+  //GET: Get all PRBs.
+  //Returns ro list if successful, [] if there is an error.
+  async getAllPRBs() {
+    try {
+      const querySnapshot = await getDocs(prbRef);
+      const prb: PRB[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as PRB;
+        data.prb_id = doc.id;
+        prb.push(data);
+      });
+      return prb;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
+
+  //GET: Get all OCs.
+  //Returns ro list if successful, [] if there is an error.
+  async getAllOCs() {
+    try {
+      const querySnapshot = await getDocs(ocRef);
+      const oc: OC[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as OC;
+        data.oc_id = doc.id;
+        oc.push(data);
+      });
+      return oc;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
+
   //GET: Get all Logs.
   //Returns log list if successful, [] if there is an error.
   async getAllLogs() {
@@ -335,6 +388,57 @@ export default class Firebase {
     }
   }
 
+  //POST: Create a new RO.
+  //Returns 200 if successful, 400 if there is an error.
+  async createNewRO(roForm: RO) {
+    try {
+      const docRef = await addDoc(roRef, {
+        ...roForm,
+      });
+      await updateDoc(docRef, {
+        ro_id: docRef.id,
+      });
+      return { status: 200 };
+    } catch (error) {
+      console.log(error);
+      return { status: 400 };
+    }
+  }
+
+  //POST: Create a new PRB.
+  //Returns 200 if successful, 400 if there is an error.
+  async createNewPRB(prbForm: PRB) {
+    try {
+      const docRef = await addDoc(prbRef, {
+        ...prbForm,
+      });
+      await updateDoc(docRef, {
+        prb_id: docRef.id,
+      });
+      return { status: 200 };
+    } catch (error) {
+      console.log(error);
+      return { status: 400 };
+    }
+  }
+
+  //POST: Create a new OC.
+  //Returns 200 if successful, 400 if there is an error.
+  async createNewOC(ocForm: OC) {
+    try {
+      const docRef = await addDoc(ocRef, {
+        ...ocForm,
+      });
+      await updateDoc(docRef, {
+        oc_id: docRef.id,
+      });
+      return { status: 200 };
+    } catch (error) {
+      console.log(error);
+      return { status: 400 };
+    }
+  }
+
   //POST: Create a new client.
   //Returns 200 if successful, 400 if there is an error.
   async createNewClient(clientForm: Client) {
@@ -380,6 +484,87 @@ export default class Firebase {
         ...client,
       });
       return { status: 200, client: client };
+    } catch (error) {
+      console.log(error);
+      return { status: 400 };
+    }
+  }
+
+  //PUT: Update RO details
+  //Returns 200 if successful, 400 if there is an error.
+  async updateRO(ro: RO) {
+    try {
+      const docRef = doc(db, "ro", ro.ro_id);
+      await updateDoc(docRef, {
+        ...ro,
+      });
+      return { status: 200, ro: ro };
+    } catch (error) {
+      console.log(error);
+      return { status: 400 };
+    }
+  }
+
+  //PUT: Update PRB details
+  //Returns 200 if successful, 400 if there is an error.
+  async updatePRB(prb: PRB) {
+    try {
+      const docRef = doc(db, "prb", prb.prb_id);
+      await updateDoc(docRef, {
+        ...prb,
+      });
+      return { status: 200, prb: prb };
+    } catch (error) {
+      console.log(error);
+      return { status: 400 };
+    }
+  }
+
+  //PUT: Update OC details
+  //Returns 200 if successful, 400 if there is an error.
+  async updateOC(oc: OC) {
+    try {
+      const docRef = doc(db, "oc", oc.oc_id);
+      await updateDoc(docRef, {
+        ...oc,
+      });
+      return { status: 200, oc: oc };
+    } catch (error) {
+      console.log(error);
+      return { status: 400 };
+    }
+  }
+
+  //DELETE: Delete PRB
+  //Returns 200 if successful, 400 if there is an error.
+  async deletePRB(prb_id: string) {
+    try {
+      await deleteDoc(doc(db, "prb", prb_id));
+      return { status: 200 };
+    } catch (error) {
+      console.log(error);
+      return { status: 400 };
+    }
+  }
+
+  //DELETE: Delete RO
+  //Returns 200 if successful, 400 if there is an error.
+  async deleteRO(ro_id: string) {
+    try {
+      await deleteDoc(doc(db, "ro", ro_id));
+      return { status: 200 };
+    } catch (error) {
+      console.log(error);
+      return { status: 400 };
+    }
+  }
+
+  //DELETE: Delete OC
+  //Returns 200 if successful, 400 if there is an error.
+  async deleteOC(oc_id: string) {
+    try {
+      await deleteDoc(doc(db, "oc", oc_id));
+      return { status: 200 };
     } catch (error) {
       console.log(error);
       return { status: 400 };

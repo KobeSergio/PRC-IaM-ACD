@@ -11,96 +11,151 @@ import { BsFunnel, BsX, BsPlusLg } from "react-icons/bs";
 import AddNewAccount from "@/components/Modals/Accounts/AddNewAccount";
 import ManageAccount from "@/components/Modals/Accounts/ManageAccount";
 import DeleteAccount from "@/components/Modals/Accounts/DeleteAccount";
+import Firebase from "@/lib/firebase";
+import { PRB } from "@/types/PRB";
+import { RO } from "@/types/RO";
+import { OC } from "@/types/OC";
+const firebase = new Firebase();
 ChartJS.register(ArcElement);
 
+interface IAccount {
+  accountType: string;
+  name: string;
+  email: string;
+  password: string;
+  office: string;
+  address: string;
+  director: string;
+  phone: string;
+}
+
 export default function Accounts() {
+  //Modal states
   const [showAddNewAccountModal, setShowAddNewAccountModal] = useState(false);
   const [showManageAccountModal, setShowManageAccountModal] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState({} as any);
   const [isLoading, setIsLoading] = useState(false);
+
+  //Accounts data
+  const [accounts, setAccounts] = useState([] as any);
+  const [filteredAccounts, setFilteredAccounts] = useState([] as any);
+
+  const fetchAccounts = async () => {
+    firebase.getAllUsers().then((data) => {
+      const prbAccounts = data["PRB"] as any; //Add new field accountType and assign PRB
+      prbAccounts.forEach((account: any) => {
+        account.accountType = "PRB";
+      });
+
+      const roAccounts = data["RO"] as any; //Add new field accountType and assign RO
+      roAccounts.forEach((account: any) => {
+        account.accountType = "RO";
+      });
+
+      const ocAccounts = data["OC"] as any; //Add new field accountType and assign OC
+      ocAccounts.forEach((account: any) => {
+        account.accountType = "OC";
+      });
+
+      setAccounts([...prbAccounts, ...roAccounts, ...ocAccounts]);
+    });
+  };
 
   useEffect(() => {
     const body = document.querySelector("body");
     if (body) {
       // null check added here
-      if (showAddNewAccountModal || showManageAccountModal || showDeleteAccountModal) {
+      if (
+        showAddNewAccountModal ||
+        showManageAccountModal ||
+        showDeleteAccountModal
+      ) {
         body.style.overflow = "hidden"; // Disable scrolling
       } else {
         body.style.overflow = "auto"; // Enable scrolling
       }
     }
+
+    if (accounts) {
+      fetchAccounts();
+    }
   }, []);
 
-  const inspections: any[] = [
-    {
-      name: "Kobe Sergio",
-      email: "ckasergio@gmail.com",
-      password: "**************",
-      accountType: "RO",
-      lastLoggedIn: "5/21/2023",
-    },
-    {
-      name: "Michelle Pantoja",
-      email: "mmapantoja@gmail.com",
-      password: "**************",
-      accountType: "RO",
-      lastLoggedIn: "5/21/2023",
-    },
-    {
-      name: "Kobe Sergio",
-      email: "ckasergio@gmail.com",
-      password: "**************",
-      accountType: "RO",
-      lastLoggedIn: "5/21/2023",
-    },
-    {
-      name: "Michelle Pantoja",
-      email: "mmapantoja@gmail.com",
-      password: "**************",
-      accountType: "RO",
-      lastLoggedIn: "5/21/2023",
-    },
-    {
-      name: "Kobe Sergio",
-      email: "ckasergio@gmail.com",
-      password: "**************",
-      accountType: "RO",
-      lastLoggedIn: "5/21/2023",
-    },
-    {
-      name: "Michelle Pantoja",
-      email: "mmapantoja@gmail.com",
-      password: "**************",
-      accountType: "RO",
-      lastLoggedIn: "5/21/2023",
-    },
-  ];
-
-  const handleSubmitAddNewAccountModal = () => {
+  const handleSubmitAddNewAccountModal = async (newAccountForm: IAccount) => {
     setIsLoading(true);
+    const accType = newAccountForm.accountType;
 
-    setTimeout(() => {
-      setShowAddNewAccountModal(false);
-      setIsLoading(false);
-    }, 2000);
+    if (accType == "PRB") {
+      const prbAccountForm: PRB = {
+        name: newAccountForm.name,
+        email: newAccountForm.email,
+        password: newAccountForm.password,
+        prb_id: "",
+        createdAt: new Date().toLocaleString(),
+        lastLoggedIn: new Date().toLocaleString(),
+      };
+      await firebase.createNewPRB(prbAccountForm as PRB);
+    } else if (accType == "RO") {
+      const roAccountForm: RO = {
+        ro_id: "",
+        director: newAccountForm.director,
+        address: newAccountForm.address,
+        office: newAccountForm.office,
+        contact: newAccountForm.phone,
+        email: newAccountForm.email,
+        password: newAccountForm.password,
+        createdAt: new Date().toLocaleString(),
+        lastLoggedIn: new Date().toLocaleString(),
+      };
+      await firebase.createNewRO(roAccountForm as RO);
+    } else if (accType == "OC") {
+      const roAccountForm: OC = {
+        oc_id: "",
+        name: newAccountForm.name,
+        email: newAccountForm.email,
+        password: newAccountForm.password,
+        createdAt: new Date().toLocaleString(),
+        lastLoggedIn: new Date().toLocaleString(),
+      };
+      await firebase.createNewOC(roAccountForm as OC);
+    }
+    //Reload accounts
+    fetchAccounts();
+    setShowAddNewAccountModal(false);
+    setIsLoading(false);
   };
 
-  const handleSubmitManageAccountModal = () => {
+  const handleSubmitManageAccountModal = async (updatedAccount: any) => {
     setIsLoading(true);
+    if (updatedAccount.accountType == "PRB") {
+      await firebase.updatePRB(updatedAccount);
+    } else if (updatedAccount.accountType == "RO") {
+      await firebase.updateRO(updatedAccount);
+    } else if (updatedAccount.accountType == "OC") {
+      await firebase.updateOC(updatedAccount);
+    }
 
-    setTimeout(() => {
-      setShowManageAccountModal(false);
-      setIsLoading(false);
-    }, 2000);
+    //Reload accounts
+    fetchAccounts();
+    setShowManageAccountModal(false);
+    setIsLoading(false);
   };
 
-  const handleSubmitDeleteAccountModal = () => {
+  const handleSubmitDeleteAccountModal = async () => {
     setIsLoading(true);
+    if (selectedAccount.accountType == "PRB") {
+      await firebase.deletePRB(selectedAccount.prb_id);
+    } else if (selectedAccount.accountType == "RO") {
+      await firebase.deleteRO(selectedAccount.ro_id);
+    } else if (selectedAccount.accountType == "OC") {
+      await firebase.deleteOC(selectedAccount.oc_id);
+    }
 
-    setTimeout(() => {
-      setShowDeleteAccountModal(false);
-      setIsLoading(false);
-    }, 2000);
+    //Reload accounts
+    fetchAccounts();
+    setShowDeleteAccountModal(false);
+    setIsLoading(false);
   };
 
   return (
@@ -114,6 +169,7 @@ export default function Accounts() {
       <ManageAccount
         isOpen={showManageAccountModal}
         setter={setShowManageAccountModal}
+        prevAccount={selectedAccount}
         isLoading={isLoading}
         onSubmit={handleSubmitManageAccountModal}
       />
@@ -195,7 +251,7 @@ export default function Accounts() {
               <h3 className="col-span-2 font-monts font-semibold text-sm text-start text-[#5C5C5C] px-4"></h3>
             </div>
             <div className="lg:overflow-y-auto w-full max-h-[28rem]">
-              {inspections.length == 0 ? (
+              {accounts.length == 0 ? (
                 <div className="min-h-full flex justify-center items-center p-44">
                   <h3 className="font-monts font-medium text-base text-center text-darkerGray">
                     There are no items to display.
@@ -203,40 +259,52 @@ export default function Accounts() {
                 </div>
               ) : (
                 <>
-                  {inspections.map((row, index) => (
+                  {accounts.map((row: any, index: any) => (
                     <div
                       key={index}
                       className={`min-w-[1068.8px] grid grid-cols-12 p-6 items-center justify-center ${
-                        index < inspections.length - 1
+                        index < accounts.length - 1
                           ? "border-b border-[#BDBDBD] "
                           : "border-none"
                       }  `}
                     >
                       <div className="col-span-5 flex flex-col gap-1 px-4 pl-0">
                         <h3 className="font-monts font-semibold text-sm text-darkerGray">
-                          {row.name}
+                          {row.name ? row.name : row.director}
                         </h3>
                         <h3 className="font-monts font-normal text-xs text-darkerGray">
                           {row.email}
                         </h3>
                         <h3 className="font-monts font-normal text-xs text-darkerGray">
-                          {row.password}
+                          {row.password?.replace(/./g, "*")}
                         </h3>
                       </div>
                       <h3 className="col-span-3 font-monts font-semibold text-sm text-darkerGray px-4">
                         {row.accountType}
+                        <p className="font-monts font-base text-xs">
+                          {row.accountType == "RO" ? row.office : ""}
+                        </p>
                       </h3>
                       <h3 className="col-span-2 font-monts font-semibold text-sm text-start text-darkerGray px-4">
                         {row.lastLoggedIn}
                       </h3>
                       <div className="col-span-2 flex justify-between font-monts font-semibold text-sm text-start text-darkerGray px-4">
                         <h3
-                          onClick={() => setShowManageAccountModal(true)}
+                          onClick={() => {
+                            setSelectedAccount(row);
+                            setShowManageAccountModal(true);
+                          }}
                           className="font-monts font-semibold text-sm text-primaryBlue cursor-pointer"
                         >
                           Manage
                         </h3>
-                        <h3 onClick={() => setShowDeleteAccountModal(true)} className="font-monts font-semibold text-sm text-[#DB1131] cursor-pointer">
+                        <h3
+                          onClick={() => {
+                            setSelectedAccount(row);
+                            setShowDeleteAccountModal(true);
+                          }}
+                          className="font-monts font-semibold text-sm text-[#DB1131] cursor-pointer"
+                        >
                           Delete
                         </h3>
                       </div>

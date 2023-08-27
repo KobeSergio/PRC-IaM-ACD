@@ -3,15 +3,80 @@ import React, { useEffect, useState } from "react";
 import { BsPencil, BsX } from "react-icons/bs";
 import { RiArrowDownSFill, RiSearchLine } from "react-icons/ri";
 
-export default function ManageInspection({ isOpen, setter, isLoading, onSubmit }: any) {
+export default function ManageInspection({
+  isOpen,
+  setter,
+  prevAccount,
+  isLoading,
+  onSubmit,
+}: any) {
+  const [email, setEmail] = useState(prevAccount.email);
+  const [password, setPassword] = useState(prevAccount.password);
+  const [name, setName] = useState(prevAccount.name);
+  const [director, setDirector] = useState(prevAccount.director || "");
+  const [phone, setPhone] = useState(prevAccount.phone || "");
+  const [office, setOffice] = useState(prevAccount.office || "");
+  const [address, setAddress] = useState(prevAccount.address || "");
+
+  const [accountType, setAccountType] = useState(prevAccount.accountType);
+
+  //Cleanup states on close back to default
+  useEffect(() => {
+    setEmail(prevAccount.email);
+    setPassword(prevAccount.password);
+    setName(prevAccount.name);
+    setDirector(prevAccount.director || "");
+    setPhone(prevAccount.phone || "");
+    setOffice(prevAccount.office || "");
+    setAddress(prevAccount.address || "");
+    setAccountType(prevAccount.accountType);
+  }, [isOpen]);
+
+  const handleSubmit = () => {
+    if (accountType === "PRB" || accountType === "OC") {
+      if (!email || !password || !name) {
+        return;
+      }
+      if (accountType === "PRB") {
+        onSubmit({
+          prb_id: prevAccount.prb_id,
+          accountType,
+          email,
+          password,
+          name,
+        });
+      } else {
+        onSubmit({
+          oc_id: prevAccount.oc_id,
+          accountType,
+          email,
+          password,
+          name,
+        });
+      }
+    } else {
+      if (!email || !password || !director || !phone || !office || !address) {
+        return;
+      }
+      onSubmit({
+        ro_id: prevAccount.ro_id,
+        accountType,
+        email,
+        password,
+        director,
+        phone,
+        office,
+        address,
+      });
+    }
+  };
 
   if (isOpen === false) {
     return <></>;
   }
+
   return (
-    <div
-      className="fixed z-40 top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center"
-    >
+    <div className="fixed z-40 top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div
         className=" overflow-x-hidden overflow-y-auto fixed w-full h-full inset-0 z-50 outline-none focus:outline-none"
         // Stop propagation of click events from modal content to backdrop
@@ -37,16 +102,6 @@ export default function ManageInspection({ isOpen, setter, isLoading, onSubmit }
               <div className="space-y-6 pt-6">
                 <div className="w-full flex flex-col gap-2 ">
                   <h6 className="w-1/2 lg:w-[19%] font-monts font-bold text-sm text-darkerGray">
-                    Name
-                  </h6>
-                  <input
-                    type="text"
-                    className="appearance-none w-full text-gray border bg-white border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-[#7C7C7C] h-fit p-2.5 pr-6 outline-none"
-                    title="name"
-                  />
-                </div>
-                <div className="w-full flex flex-col gap-2 ">
-                  <h6 className="w-1/2 lg:w-[19%] font-monts font-bold text-sm text-darkerGray">
                     Account type
                   </h6>
                   <div className="w-full relative">
@@ -54,14 +109,13 @@ export default function ManageInspection({ isOpen, setter, isLoading, onSubmit }
                       className="block cursor-pointer appearance-none w-full text-gray border bg-white border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-[#7C7C7C] h-fit p-2.5 pr-6 outline-none"
                       id="client"
                       aria-label="account-type"
+                      onChange={(e) => setAccountType(e.target.value)}
+                      value={accountType}
                     >
-                      {/* {clientList.map(({ client_id, name }) => (
-                        <option key={client_id} value={name}>
-                          {name}
-                        </option>
-                      ))} */}
+                      <option value={"PRB"}>PRB</option>
+                      <option value={"RO"}>RO</option>
+                      <option value={"OC"}>OC</option>
                     </select>
-
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                       <RiArrowDownSFill className="flex w-4 h-4 object-contain cursor-pointer" />
                     </div>
@@ -69,12 +123,14 @@ export default function ManageInspection({ isOpen, setter, isLoading, onSubmit }
                 </div>
                 <div className="w-full flex flex-col gap-2 ">
                   <h6 className="w-1/2 lg:w-[19%] font-monts font-bold text-sm text-darkerGray">
-                    Username
+                    Email
                   </h6>
                   <input
                     type="text"
                     className="appearance-none w-full text-gray border bg-white border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-[#7C7C7C] h-fit p-2.5 pr-6 outline-none"
                     title="username"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div className="w-full flex flex-col gap-2 ">
@@ -85,8 +141,81 @@ export default function ManageInspection({ isOpen, setter, isLoading, onSubmit }
                     type="password"
                     className="appearance-none w-full text-gray border bg-white border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-[#7C7C7C] h-fit p-2.5 pr-6 outline-none"
                     title="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
+                {
+                  //If account type is PRB/OC just get the name, if RO get address, director name, phone, and office
+                  accountType === "PRB" || accountType === "OC" ? (
+                    <div className="w-full flex flex-col gap-2 ">
+                      <h6 className="w-1/2 lg:w-[19%] font-monts font-bold text-sm text-darkerGray">
+                        Name
+                      </h6>
+                      <input
+                        type="text"
+                        className="appearance-none w-full text-gray border bg-white border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-[#7C7C7C] h-fit p-2.5 pr-6 outline-none"
+                        title="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="w-full flex flex-row gap-2 ">
+                        <div className="w-2/3 flex flex-col gap-2 ">
+                          <h6 className="w-1/2 lg:w-fit font-monts font-bold text-sm text-darkerGray">
+                            Director Name
+                          </h6>
+                          <input
+                            type="text"
+                            className="appearance-none w-full text-gray border bg-white border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-[#7C7C7C] h-fit p-2.5 pr-6 outline-none"
+                            title="name"
+                            value={director}
+                            onChange={(e) => setDirector(e.target.value)}
+                          />
+                        </div>
+                        <div className="w-1/3 flex flex-col gap-2 ">
+                          <h6 className="w-1/2 lg:w-[19%] font-monts font-bold text-sm text-darkerGray">
+                            Phone
+                          </h6>
+                          <input
+                            type="text"
+                            className="appearance-none w-full text-gray border bg-white border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-[#7C7C7C] h-fit p-2.5 pr-6 outline-none"
+                            title="name"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="w-full flex flex-col gap-2 ">
+                        <h6 className="w-1/2 lg:w-[19%] font-monts font-bold text-sm text-darkerGray">
+                          Office
+                        </h6>
+                        <input
+                          type="text"
+                          className="appearance-none w-full text-gray border bg-white border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-[#7C7C7C] h-fit p-2.5 pr-6 outline-none"
+                          title="name"
+                          value={office}
+                          onChange={(e) => setOffice(e.target.value)}
+                        />
+                      </div>
+                      <div className="w-full flex flex-col gap-2 ">
+                        <h6 className="w-1/2 lg:w-[19%] font-monts font-bold text-sm text-darkerGray">
+                          Address
+                        </h6>
+                        <input
+                          type="text"
+                          className="appearance-none w-full text-gray border bg-white border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-[#7C7C7C] h-fit p-2.5 pr-6 outline-none"
+                          title="name"
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                        />
+                      </div>
+                    </>
+                  )
+                }
               </div>
             </div>
             {/*footer*/}
@@ -103,7 +232,7 @@ export default function ManageInspection({ isOpen, setter, isLoading, onSubmit }
                   isLoading ? "flex items-center justify-center gap-0.5" : ""
                 } py-2 px-4 font-monts font-semibold text-sm text-white bg-[#3C6497] rounded-lg outline-none w-fit`}
                 type="button"
-                onClick={onSubmit}
+                onClick={handleSubmit}
               >
                 {isLoading ? (
                   <div className="flex">
