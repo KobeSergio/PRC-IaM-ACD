@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 
 export default function Nav() {
   const { data } = useSession();
+  console.log(data);
 
   return (
     <nav className="w-full relative z-40 bg-white shadow">

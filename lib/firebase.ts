@@ -69,6 +69,7 @@ export default class Firebase {
       }
       for (const doc of querySnapshot.docs) {
         if (doc.data().password === password) {
+          console.log(doc.data());
           return { status: 200, data: doc.data() };
         }
       }

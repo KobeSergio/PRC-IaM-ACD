@@ -28,6 +28,24 @@ export const authOptions: AuthOptions = {
     signIn: "/",
   },
 
+  callbacks: {
+    async jwt({ token, user }: any) {
+      // This callback is invoked when signing in and whenever a session is accessed (if `jwt` session strategy is used).
+      if (user) {
+        token.acd_id = user.acd_id;
+        token.createdAt = user.createdAt;
+        token.lastLoggedIn = user.lastLoggedIn;
+      }
+      return token;
+    },
+
+    async session({ session, token }: any) {
+      session.user.acd_id = token.acd_id;
+      session.user.createdAt = token.createdAt;
+      session.user.lastLoggedIn = token.lastLoggedIn;
+      return session;
+    },
+  },
   secret: process.env.NEXTAUTH_SECRET,
 };
 

@@ -1,98 +1,126 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
-import Image from "next/image";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Chart as ChartJS, ArcElement } from "chart.js";
-import { Pie } from "react-chartjs-2";
 import { RiArrowDownSFill, RiSearchLine } from "react-icons/ri";
-import { BsFunnel, BsX } from "react-icons/bs";
-import FilterModal from "@/components/Modals/Logs/FilterModal";
 ChartJS.register(ArcElement);
+import { useLogs } from "@/contexts/LogContext";
+import { Log } from "@/types/Log";
+
 export default function Logs() {
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleCloseFilterModal = () => {
-    setShowFilterModal(false);
-  };
-  const handleSubmitFilterModal = () => {
-    //insert logic here
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setShowFilterModal(false);
-      setIsLoading(false);
-    }, 2000);
-  };
-
+  const [showModal, setShowModal] = useState(false);
   useEffect(() => {
     const body = document.querySelector("body");
-    if (body) {
-      // null check added here
-      if (showFilterModal) {
-        body.style.overflow = "hidden"; // Disable scrolling
+    if (showModal) {
+      if (body) body.style.overflow = "hidden"; // Disable scrolling
+    } else {
+      if (body) body.style.overflow = "auto"; // Enable scrolling
+    }
+  }, [showModal]);
+
+  const { logs } = useLogs();
+
+  const [filteredLogs, setFilteredLogs] = useState<Log[]>(logs);
+
+  //Author type sorter
+  const [selectedAuthor, setSelectedAuthor] = useState("All"); // Default to all authors
+
+  //Author type sorter handler
+  useEffect(() => {
+    if (selectedAuthor == "All") {
+      setFilteredLogs(
+        logs.filter(
+          (log) =>
+            new Date(log.timestamp).getFullYear() == parseInt(selectedYear)
+        )
+      );
+    } else {
+      const filteredLogs = logs.filter(
+        (log) =>
+          new Date(log.timestamp).getFullYear() == parseInt(selectedYear) &&
+          log.author_type == selectedAuthor
+      );
+      setFilteredLogs(filteredLogs);
+    }
+  }, [selectedAuthor]);
+
+  //Client sorter
+  const [clients, setClients] = useState(["All"]);
+  const [selectedClient, setSelectedClient] = useState("All"); // Default to all clients
+
+  //Handler for client filter
+  useEffect(() => {
+    if (selectedClient == "All") {
+      setFilteredLogs(
+        logs.filter(
+          (log) =>
+            new Date(log.timestamp).getFullYear() == parseInt(selectedYear)
+        )
+      );
+    } else {
+      const filteredLogs = logs.filter(
+        (log) =>
+          new Date(log.timestamp).getFullYear() == parseInt(selectedYear) &&
+          log.client_details.name == selectedClient
+      );
+      setFilteredLogs(filteredLogs);
+    }
+  }, [selectedClient]);
+
+  //Year sorter
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState(currentYear as any); // Default to current year
+  const [years, setYears] = useState([currentYear]);
+
+  //Handler for year filter
+  useEffect(() => {
+    //Filtered logs also
+    const filteredLogs = logs.filter(
+      (log) => new Date(log.timestamp).getFullYear() == parseInt(selectedYear)
+    );
+    setFilteredLogs(filteredLogs);
+  }, [selectedYear]);
+
+  useEffect(() => {
+    if (filteredLogs.length > 0) {
+      const uniqueYears = new Set(
+        logs.map((log) => new Date(log.timestamp).getFullYear())
+      );
+      const uniqueYearsArray = Array.from(uniqueYears);
+      setYears([...uniqueYearsArray].sort().reverse());
+
+      //Get unique clients also
+      const uniqueClients = new Set(logs.map((log) => log.client_details.name));
+      const uniqueClientsArray = Array.from(uniqueClients);
+      setClients([...uniqueClientsArray].sort());
+    }
+  }, [filteredLogs]);
+
+  //Search filter
+  const [search, setSearch] = useState("");
+
+  //Handler for search filter
+  useEffect(() => {
+    if (logs.length > 0) {
+      if (search == "") {
+        setFilteredLogs(
+          logs.filter(
+            (log) =>
+              new Date(log.timestamp).getFullYear() == parseInt(selectedYear)
+          )
+        );
       } else {
-        body.style.overflow = "auto"; // Enable scrolling
+        const searchFilteredLogs = filteredLogs.filter((log) =>
+          log.author_details.name.toLowerCase().includes(search)
+        );
+        setFilteredLogs(searchFilteredLogs);
       }
     }
-  }, [showFilterModal]);
-
-
-  const inspections: any[] = [
-    {
-      timestamp: "6/20/2023 12:17AM",
-      name: "Makati Med",
-      author: "ACD",
-      action: "Issued certificate of compliance",
-    },
-    {
-      timestamp: "6/20/2023 12:17AM",
-      name: "Makati Med",
-      author: "PRB N&D",
-      action: "Submitted IMWPR",
-    },
-    {
-      timestamp: "6/20/2023 12:17AM",
-      name: "Makati Med",
-      author: "ACD",
-      action: "Issued certificate of compliance",
-    },
-    {
-      timestamp: "6/20/2023 12:17AM",
-      name: "Makati Med",
-      author: "ACD",
-      action: "Issued certificate of compliance",
-    },
-    {
-      timestamp: "6/20/2023 12:17AM",
-      name: "Makati Med",
-      author: "ACD",
-      action: "Issued certificate of compliance",
-    },
-    {
-      timestamp: "6/20/2023 12:17AM",
-      name: "Makati Med",
-      author: "ACD",
-      action: "Issued certificate of compliance",
-    },
-    {
-      timestamp: "6/20/2023 12:17AM",
-      name: "Makati Med",
-      author: "ACD",
-      action: "Issued certificate of compliance",
-    },
-  ];
+  }, [search]);
 
   return (
     <>
-    <FilterModal
-        isOpen={showFilterModal}
-        setter={handleCloseFilterModal}
-        isLoading={isLoading}
-        onSubmit={handleSubmitFilterModal}
-      />
       <div className="min-h-[75vh] flex flex-col lg:flex-row gap-5">
         <aside className="w-full lg:w-1/4">
           <Sidebar />
@@ -105,12 +133,14 @@ export default function Logs() {
                   className="block cursor-pointer appearance-none w-fit text-gray border bg-white border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-[#7C7C7C] h-fit p-2.5 pr-6 outline-none"
                   id="year"
                   aria-label="year"
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
                 >
-                  <option value="">2023</option>
-                  <option value="2022">2022</option>
-                  <option value="2021">2021</option>
-                  <option value="2020">2020</option>
-                  <option value="2019">2019</option>
+                  {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
                 </select>
 
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
@@ -121,22 +151,26 @@ export default function Logs() {
                 <RiSearchLine className="absolute left-3 fill-[#7C7C7C]" />
                 <input
                   type="text"
-                  id="worker-search"
                   className="pl-10 p-2.5 outline-none bg-white border border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-gray text-inherit flex w-full"
                   placeholder="Search for a client"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              <div className="">
+              {/* <div className="">
                 <button
                   type="button"
                   id="filter"
                   aria-label="filter"
                   className="p-2.5 outline-none bg-white border border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-gray text-inherit flex w-full"
-                  onClick={() => setShowFilterModal(true)}
+                  onClick={() => setShowModal(true)}
                 >
                   <BsFunnel size={20} className="fill-[#7C7C7C]" />
                 </button>
-              </div>
+                {showModal && (
+                  <FilterModal closeModal={() => setShowModal(false)} />
+                )}
+              </div> */}
             </div>
             <div className="max-lg:justify-center flex flex-col md:flex-row gap-3">
               <div className="w-full relative">
@@ -144,10 +178,15 @@ export default function Logs() {
                   className="block cursor-pointer appearance-none w-full lg:w-fit text-gray border bg-white border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-[#7C7C7C] h-fit p-2.5 pr-6 outline-none"
                   id="client"
                   aria-label="client"
+                  value={selectedClient}
+                  onChange={(e) => setSelectedClient(e.target.value)}
                 >
-                  <option value="mapua">Client: Mapua University</option>
+                  {clients.map((client) => (
+                    <option key={client} value={client}>
+                      Client: {client}
+                    </option>
+                  ))}
                 </select>
-
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                   <RiArrowDownSFill className="flex w-4 h-4 object-contain cursor-pointer" />
                 </div>
@@ -157,8 +196,14 @@ export default function Logs() {
                   className="block cursor-pointer appearance-none w-full lg:w-fit text-gray border bg-white border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-[#7C7C7C] h-fit p-2.5 pr-6 outline-none"
                   id="account-type"
                   aria-label="account-type"
+                  onChange={(e) => setSelectedAuthor(e.target.value)}
                 >
-                  <option value="account-type-all">Account Type: All</option>
+                  <option value="All">Author: All</option>
+                  <option value="prb">Author: PRB</option>
+                  <option value="ro">Author: RO</option>
+                  <option value="acd">Author: ACD</option>
+                  <option value="oc">Author: OC</option>
+                  <option value="client">Author: Client</option>
                 </select>
 
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
@@ -168,9 +213,9 @@ export default function Logs() {
             </div>
           </div>
 
-          <div className="overflow-x-auto lg:overflow-x-hidden w-full h-full bg-white border border-[#D5D7D8] rounded-[10px]">
+          <div className="overflow-x-auto w-full h-full bg-white border border-[#D5D7D8] rounded-[10px]">
             <div className="min-w-[1068.8px] grid grid-cols-12 border-b border-[#BDBDBD] p-6">
-              <h3 className="col-span-2 font-monts font-semibold text-sm text-start text-[#5C5C5C] px-4 pl-0">
+              <h3 className="col-span-3 font-monts font-semibold text-sm text-start text-[#5C5C5C] px-4 pl-0">
                 Timestamp
               </h3>
               <h3 className="col-span-3 font-monts font-semibold text-sm text-start text-[#5C5C5C] px-4">
@@ -179,39 +224,42 @@ export default function Logs() {
               <h3 className="col-span-2 font-monts font-semibold text-sm text-start text-[#5C5C5C] px-4">
                 Author
               </h3>
-              <h3 className="col-span-5 font-monts font-semibold text-sm text-start text-[#5C5C5C] px-4">
+              <h3 className="col-span-4 font-monts font-semibold text-sm text-start text-[#5C5C5C] px-4">
                 Action
               </h3>
             </div>
 
-            <div className="overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto w-full max-h-[28rem]">
-              {inspections.length == 0 ? (
-                <div className="min-h-full flex justify-center items-center p-48">
+            <div className="lg:overflow-y-auto w-full max-h-[25rem]">
+              {filteredLogs.length == 0 ? (
+                <div>
                   <h3 className="font-monts font-medium text-base text-center text-darkerGray">
                     There are no items to display.
                   </h3>
                 </div>
               ) : (
                 <>
-                  {inspections.map((row, index) => (
+                  {filteredLogs.map((row, index) => (
                     <div
                       key={index}
                       className={`min-w-[1068.8px] grid grid-cols-12 p-6 ${
-                        index < inspections.length - 1
+                        index < filteredLogs.length - 1
                           ? "border-b border-[#BDBDBD] "
                           : "border-none"
                       }  `}
                     >
-                      <h3 className=" col-span-2 font-monts font-semibold text-sm text-darkerGray px-4 pl-0">
+                      <h3 className=" col-span-3 font-monts font-semibold text-sm text-darkerGray px-4 pl-0">
                         {row.timestamp}
                       </h3>
                       <h3 className=" col-span-3 font-monts font-semibold text-sm text-darkerGray px-4">
-                        {row.name}
+                        {row.client_details.name}
                       </h3>
                       <h3 className=" col-span-2 font-monts font-semibold text-sm text-start text-darkerGray px-4">
-                        {row.author}
+                        {row.author_type.toUpperCase()}:{" "}
+                        {row.author_details.hasOwnProperty("name")
+                          ? row.author_details.name
+                          : row.author_details.director}
                       </h3>
-                      <h3 className=" col-span-5 font-monts font-semibold text-sm text-start text-darkerGray px-4">
+                      <h3 className=" col-span-4 font-monts font-semibold text-sm text-start text-darkerGray px-4">
                         {row.action}
                       </h3>
                     </div>
