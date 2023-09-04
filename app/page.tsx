@@ -103,10 +103,19 @@ export default function SignIn() {
           </h4>
         </div> */}
         <button
+          typeof="button"
           onClick={handleSubmit}
           className="w-full bg-primaryBlue hover:bg-[#365592] font-monts font-semibold text-center text-sm  text-white py-3 px-5 rounded-lg mt-6 flex items-center justify-center"
         >
-          {isLoading ? <Spinner /> : "Submit"}
+          {isLoading ? (
+            <div className="flex flex-row items-center gap-1">
+              {" "}
+              <Spinner />
+              Logging in...
+            </div>
+          ) : (
+            "Login"
+          )}
         </button>
       </form>
     </div>

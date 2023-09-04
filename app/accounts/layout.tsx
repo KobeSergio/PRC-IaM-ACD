@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth/next";
 export const metadata = {
-  title: "PRC Application Management System",
-  description: "Thesis keme",
+  title: "PRC Inspection and Monitoring System",
+  description: "",
 };
 
 export default async function LogsLayout({
