@@ -30,9 +30,8 @@ export const InspectionProvider: React.FC<InspectionProviderProps> = ({
     if (acd) {
       setACD(JSON.parse(acd));
     }
-  }, []);
 
-  useEffect(() => {
+    console.log(inspections.length);
     if (inspections.length == 0) {
       firebase
         .getAllInspections()

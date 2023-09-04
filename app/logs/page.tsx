@@ -112,7 +112,7 @@ export default function Logs() {
         );
       } else {
         const searchFilteredLogs = filteredLogs.filter((log) =>
-          log.author_details.name.toLowerCase().includes(search)
+          log.author_details.name.toLowerCase().includes(search.toLowerCase())
         );
         setFilteredLogs(searchFilteredLogs);
       }

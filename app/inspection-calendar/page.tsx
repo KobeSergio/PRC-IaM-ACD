@@ -24,8 +24,19 @@ export default function InspectionCalendar() {
     useState<Inspection[]>(inspections);
   //Year sorter
   const currentYear = new Date().getFullYear();
-  const [selectedYear, setSelectedYear] = useState("All" as any); // Default to current year
+  const [selectedYear, setSelectedYear] = useState(currentYear as any); // Default to current year
   const [years, setYears] = useState([currentYear]);
+
+  useEffect(() => {
+    if (inspections.length > 0 && filteredInspections.length == 0)
+      setFilteredInspections(
+        inspections.filter(
+          (inspection) =>
+            new Date(inspection.inspection_date).getFullYear() ==
+            parseInt(selectedYear)
+        )
+      );
+  }, [inspections]);
 
   //Handler for year filter
   useEffect(() => {
@@ -69,8 +80,12 @@ export default function InspectionCalendar() {
       } else {
         const searchFilteredInspections = filteredInspections.filter(
           (inspection) =>
-            inspection.client_details.name.toLowerCase().includes(search)
+            inspection.client_details.name
+              .toLowerCase()
+              .includes(search.toLowerCase())
         );
+        console.log(searchFilteredInspections);
+
         setFilteredInspections(searchFilteredInspections);
       }
     }
@@ -182,7 +197,11 @@ export default function InspectionCalendar() {
         isOpen={showFilterModal}
         setter={() => setShowFilterModal(false)}
         isLoading={isLoading}
-        inspections={inspections}
+        inspections={inspections.filter(
+          (inspection) =>
+            new Date(inspection.inspection_date).getFullYear() ==
+            parseInt(selectedYear)
+        )}
         setFilteredInspections={setFilteredInspections}
       />
       <div className="min-h-[75vh] flex flex-col lg:flex-row gap-5">
@@ -216,10 +235,8 @@ export default function InspectionCalendar() {
                   <RiSearchLine className="absolute left-3 fill-[#7C7C7C]" />
                   <input
                     type="text"
-                    id="worker-search"
                     className="pl-10 p-2.5 outline-none bg-white border border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-gray text-inherit flex w-full"
                     placeholder="Search for a client"
-                    onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
                 <div className="">
@@ -356,6 +373,8 @@ export default function InspectionCalendar() {
                     id="worker-search"
                     className="pl-10 p-2.5 outline-none bg-white border border-[#D5D7D8] rounded-lg font-monts font-medium text-sm text-gray text-inherit flex w-full"
                     placeholder="Search for a client"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
                 <div className="">
@@ -406,7 +425,7 @@ export default function InspectionCalendar() {
                 </h3>
               </div>
 
-              <div className="lg:overflow-y-auto w-full max-h-[25rem] justify-center items-center flex">
+              <div className="lg:overflow-y-auto w-full max-h-[25rem] justify-center items-center flex flex-col">
                 {filteredInspections.length == 0 ? (
                   <h3 className="font-monts font-medium text-base text-center text-darkerGray">
                     There are no items to display.
