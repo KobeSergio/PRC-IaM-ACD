@@ -1,4 +1,4 @@
-import Spinner from "@/components/Spinner";
+import { Spinner } from "@/components/Spinner";
 import React, { useState } from "react";
 
 import { BsX } from "react-icons/bs";

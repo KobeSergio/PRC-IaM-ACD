@@ -1,4 +1,8 @@
+import { PageSpinner } from "@/components/Spinner";
 export default function Loading() {
-    // Or a custom loading skeleton component
-    return <p>Loading...</p>
-  }
+  return (
+    <div className="w-full h-[80vh] flex items-center justify-center">
+      <PageSpinner />
+    </div>
+  );
+}

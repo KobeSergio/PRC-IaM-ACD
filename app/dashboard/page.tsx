@@ -24,7 +24,7 @@ export default function Dashboard() {
   const { inspections } = useInspections();
   const { logs } = useLogs();
 
-  const { data } = useSession();
+  const { data }: any  = useSession();
 
   const [filteredLogs, setFilteredLogs] = useState<Log[]>(logs);
   //Year sorter
@@ -33,10 +33,11 @@ export default function Dashboard() {
   const [years, setYears] = useState([currentYear]);
   const defaultInspections = inspections.filter(
     (inspection) =>
-      inspection.inspection_task.includes("Certificate of compliance") &&
-      inspection.inspection_task.includes("Travel Order") &&
-      inspection.inspection_task.includes("Additional Recommendation") &&
-      inspection.inspection_task.includes("Cancellation Recommendation")
+      inspection.inspection_task.includes("COC") ||
+      inspection.inspection_task.includes("TO") ||
+      inspection.inspection_task.includes("inspection recommendation") ||
+      inspection.inspection_task.includes("cancellation recommendation") ||
+      inspection.inspection_task.includes("rescheduling recommendation")
   );
 
   //This is the list of inspections that will be displayed
@@ -55,10 +56,10 @@ export default function Dashboard() {
       setFilteredInspections(
         inspections.filter(
           (inspection) =>
-            inspection.inspection_task.includes("Certificate of compliance") &&
-            inspection.inspection_task.includes("Travel Order") &&
-            inspection.inspection_task.includes("Additional Recommendation") &&
-            inspection.inspection_task.includes("Cancellation Recommendation")
+            inspection.inspection_task.includes("COC") ||
+            inspection.inspection_task.includes("TO") ||
+            inspection.inspection_task.includes("inspection recommendation") ||
+            inspection.inspection_task.includes("cancellation recommendation")
         )
       );
       setFilteredLogs(logs);
@@ -80,7 +81,7 @@ export default function Dashboard() {
 
   //Get number of inspections where inspection_task is for the ACD
   const [cancellation, setCancellation] = useState(0);
-  const [additionalRecommendation, setAdditionalApproval] = useState(0);
+  const [inspectionRecommendation, setAdditionalApproval] = useState(0);
   const [travelOrder, setTravelOrder] = useState(0);
   const [cocIssuance, setCocIssuance] = useState(0);
 
@@ -95,18 +96,18 @@ export default function Dashboard() {
       const _cancellation = inspectionsByDate.filter((inspection) =>
         inspection.inspection_task.includes("Cancellation Recommnedation")
       ).length;
-      const _additionalRecommendation = inspectionsByDate.filter((inspection) =>
-        inspection.inspection_task.includes("Additional Recommendation")
+      const _inspectionRecommendation = inspectionsByDate.filter((inspection) =>
+        inspection.inspection_task.includes("inspection recommendation")
       ).length;
       const _travelOrder = inspectionsByDate.filter((inspection) =>
-        inspection.inspection_task.includes("Travel Order")
+        inspection.inspection_task.includes("TO")
       ).length;
       const _cocIssuance = inspectionsByDate.filter((inspection) =>
-        inspection.inspection_task.includes("Certificate of compliance")
+        inspection.inspection_task.includes("COC")
       ).length;
 
       setCancellation(_cancellation);
-      setAdditionalApproval(_additionalRecommendation);
+      setAdditionalApproval(_inspectionRecommendation);
       setTravelOrder(_travelOrder);
       setCocIssuance(_cocIssuance);
 
@@ -134,8 +135,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (logs.length != 0 && data != null) {
-      const user = data.user as any;
-      const _logs = logs.filter((log) => log.author_id == user.acd_id);
+      const _logs = logs.filter((log) => log.author_id == data.acd_id);
 
       const accomplished = _logs.filter((log) =>
         log.action.includes("Accomplished")
@@ -172,16 +172,14 @@ export default function Dashboard() {
               (inspection) =>
                 new Date(inspection.inspection_date).getFullYear() ==
                   parseInt(selectedYear) &&
-                inspection.inspection_task.includes(
-                  "Certificate of compliance"
-                ) &&
-                inspection.inspection_task.includes("Travel Order") &&
-                inspection.inspection_task.includes(
-                  "Additional Recommendation"
-                ) &&
-                inspection.inspection_task.includes(
-                  "Cancellation Recommendation"
-                )
+                (inspection.inspection_task.includes("COC") ||
+                  inspection.inspection_task.includes("TO") ||
+                  inspection.inspection_task.includes(
+                    "inspection recommendation"
+                  ) ||
+                  inspection.inspection_task.includes(
+                    "cancellation recommendation"
+                  ))
             )
           );
         }
@@ -228,7 +226,7 @@ export default function Dashboard() {
                 </h1>
                 <h3 className="font-monts font-semibold text-base text-darkerGray">
                   {cancellation +
-                    additionalRecommendation +
+                    inspectionRecommendation +
                     travelOrder +
                     cocIssuance}{" "}
                   total,{" "}
@@ -244,9 +242,9 @@ export default function Dashboard() {
                       <p className="font-semibold">{cancellation}</p>
                     </div>
                     <div className="flex flex-row justify-between font-monts text-sm">
-                      <p className="font-medium">Additional Recommendation</p>
+                      <p className="font-medium">Inspection Recommendation</p>
                       <p className="font-semibold">
-                        {additionalRecommendation}
+                        {inspectionRecommendation}
                       </p>
                     </div>
                     <div className="flex flex-row justify-between font-monts text-sm">

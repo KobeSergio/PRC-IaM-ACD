@@ -1,4 +1,4 @@
-import Spinner from "@/components/Spinner";
+import { Spinner } from "@/components/Spinner";
 import React from "react";
 
 import { BsX } from "react-icons/bs";

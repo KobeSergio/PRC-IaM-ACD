@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 // import Firebase from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import Spinner from "@/components/Spinner";
+import { Spinner } from "@/components/Spinner";
 import { signIn } from "next-auth/react";
 // const firebase = new Firebase();
 
