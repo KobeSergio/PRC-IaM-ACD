@@ -466,7 +466,7 @@ export default class Firebase {
       });
       await updateDoc(docRef, {
         log_id: docRef.id,
-        author_type: "prb",
+        author_type: "acd",
         author_id: user_id,
       });
       return { status: 200 };
@@ -530,6 +530,19 @@ export default class Firebase {
         ...oc,
       });
       return { status: 200, oc: oc };
+    } catch (error) {
+      console.log(error);
+      return { status: 400 };
+    }
+  }
+
+  //PUT: Update inspection
+  //Returns 200 if successful, 400 if there is an error.
+  async updateInspection(inspection: Inspection) {
+    try {
+      const docRef = doc(db, "inspections", inspection.inspection_id);
+      await updateDoc(docRef, { ...inspection });
+      return { status: 200, inspection: inspection };
     } catch (error) {
       console.log(error);
       return { status: 400 };

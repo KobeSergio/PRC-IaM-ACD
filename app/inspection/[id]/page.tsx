@@ -2,19 +2,19 @@
 
 import Breadcrumbs from "@/components/Breadcrumbs";
 import CancellationRequest from "@/components/Modals/CancellationRequest";
-import EditInspection from "@/components/Modals/Dashboard/EditInspection";
 import InspectionCancellation from "@/components/Tasks/InspectionCancellation";
 import InspectionRecommendation from "@/components/Tasks/InspectionRecommendation";
-import UploadTravelOrder from "@/components/Tasks/UploadTravelOrder";
 import PendingWaiting from "@/components/Tasks/PendingWaiting";
 import ReschedulingRequest from "@/components/ReschedulingRequest";
-import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { BsPencil, BsX } from "react-icons/bs";
-import { RiArrowDownSFill, RiSearchLine } from "react-icons/ri";
 import Firebase from "@/lib/firebase";
 import { Inspection } from "@/types/Inspection";
 import { Client } from "@/types/Client";
+import COCUpload from "@/components/Tasks/COCUpload";
+import TOUpload from "@/components/Tasks/TOUpload";
+import { Log } from "@/types/Log";
+import { useSession } from "next-auth/react";
 const firebase = new Firebase();
 
 export default function Page({ params }: { params: { id: string } }) {
@@ -22,6 +22,8 @@ export default function Page({ params }: { params: { id: string } }) {
   const [showCancellationModal, setShowCancellationModal] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { data }: any = useSession();
 
   const [inspectionData, setInspectionData] = useState<Inspection>(
     {} as Inspection
@@ -88,6 +90,66 @@ export default function Page({ params }: { params: { id: string } }) {
     }, 2000);
   };
 
+  const handleScheduleApproval = async (decision: number, remarks: string) => {
+    if ((decision == 1 || decision == 0) && remarks == "")
+      return alert("Please fill out all fields.");
+
+    if (
+      confirm(
+        `Are you sure you want to ${
+          decision == 0 ? "not recommend" : "recommend"
+        } this inspection forward?`
+      ) == undefined
+    ) {
+      console.log("first");
+      return;
+    }
+
+    setIsLoading(true);
+
+    let inspection: Inspection = {} as Inspection;
+    let log: Log = {} as Log;
+
+    if (decision == 0) {
+      inspection = {
+        ...inspectionData,
+        inspection_task: "Inspection declined",
+        status: "Cancelled",
+      };
+
+      log = {
+        log_id: "",
+        timestamp: new Date().toLocaleString(),
+        client_details: inspectionData.client_details as Client,
+        author_details: inspectionData.acd_details,
+        action: "Cancelled inspection recommendation",
+        author_type: "",
+        author_id: "",
+      };
+    } else if (decision == 1) {
+      //Send inspection to OC approval
+      inspection = {
+        ...inspectionData,
+        inspection_task: "For inspection approval",
+      };
+
+      log = {
+        log_id: "",
+        timestamp: new Date().toLocaleString(),
+        client_details: inspectionData.client_details as Client,
+        author_details: inspectionData.acd_details,
+        action: "Accomplished inspection recommendation",
+        author_type: "",
+        author_id: "",
+      };
+    }
+
+    await firebase.createLog(log, data.acd_id);
+    await firebase.updateInspection(inspection);
+    setInspectionData(inspection);
+    setIsLoading(false);
+  };
+
   useEffect(() => {
     const body = document.querySelector("body");
     if (body) {
@@ -135,15 +197,6 @@ export default function Page({ params }: { params: { id: string } }) {
             <h1 className="font-monts font-bold text-lg text-darkerGray">
               Inspection Details
             </h1>
-            <div
-              className="flex flex-row gap-2 cursor-pointer items-center"
-              onClick={() => setShowEditInspectionModal(true)}
-            >
-              <BsPencil className="fill-darkerGray" />
-              <p className="font-monts text-sm font-semibold text-darkerGray">
-                Edit
-              </p>
-            </div>
           </div>
           <div className="flex flex-col lg:flex-row justify-between gap-4">
             <div className="flex flex-col gap-1">
@@ -216,41 +269,21 @@ export default function Page({ params }: { params: { id: string } }) {
         </div>
 
         {/* If inspection data is scheduling and if a cancellation/rescheduling request is already ongoing, dont show the btns */}
-        {task != "scheduling" &&
-          task.includes("for") &&
-          (task.includes("approval") ||
-            inspectionData.inspection_task
-              .toLowerCase()
-              .includes("recommendation")) && (
-            <div className="flex flex-row flex-wrap justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setShowRescheduleModal(true)}
-                className="w-full md:w-fit flex items-center justify-center gap-2 cursor-pointer text-gray border bg-primaryBlue border-primaryBlue rounded-lg font-monts font-semibold text-sm text-white h-fit p-2.5"
-              >
-                Request for rescheduling
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowCancellationModal(true)}
-                className="w-full md:w-fit flex items-center justify-center gap-2 cursor-pointer text-gray border bg-[#973C3C] border-[#973C3C] rounded-lg font-monts font-semibold text-sm text-white h-fit p-2.5"
-              >
-                Request for cancellation
-              </button>
-            </div>
-          )}
 
-        {task == "scheduling - PRB" ? (
-          <></>
-        ) : task == "imwpr" ? (
-          <></>
-        ) : task == "send nim" ? (
-          <></>
-        ) : task == "review inspection requirements" ? (
-          //To follow interface where the client can upload the requirements
-          <></>
+        {task.includes("inspection recommendation") ? (
+          <InspectionRecommendation
+            inspectionData={inspectionData}
+            decision={handleScheduleApproval}
+            isLoading={isLoading}
+          />
+        ) : task.includes("inspection cancellation") ? (
+          <InspectionCancellation />
+        ) : task.includes("coc") ? (
+          <COCUpload />
+        ) : task.includes("to") ? (
+          <TOUpload />
         ) : (
-          <PendingWaiting />
+          <PendingWaiting task={task} />
         )}
       </div>
     </>

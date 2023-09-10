@@ -6,8 +6,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
 export default function Nav() {
-  const { data } = useSession();
-  console.log(data);
+  const { data }: any = useSession();
 
   return (
     <nav className="w-full relative z-40 bg-white shadow">
@@ -29,7 +28,7 @@ export default function Nav() {
           </div>
         </div>
         <h3 className="font-monts font-semibold text-base text-darkerGray">
-          {data?.user?.name}
+          {data?.name}
         </h3>
       </div>
     </nav>

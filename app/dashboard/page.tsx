@@ -24,7 +24,7 @@ export default function Dashboard() {
   const { inspections } = useInspections();
   const { logs } = useLogs();
 
-  const { data }: any  = useSession();
+  const { data }: any = useSession();
 
   const [filteredLogs, setFilteredLogs] = useState<Log[]>(logs);
   //Year sorter
@@ -48,7 +48,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (defaultInspections.length > 0 && filteredInspections.length == 0)
       setFilteredInspections(defaultInspections);
-  }, [defaultInspections]);
+  }, [defaultInspections, inspections]);
 
   //Handler for year filter
   useEffect(() => {

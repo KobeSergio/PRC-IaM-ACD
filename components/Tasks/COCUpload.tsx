@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function InspectionCancellation() {
+export default function COCUpload() {
   return (
     <div className="h-full bg-white border border-[#D5D7D8] flex flex-col rounded-[10px] p-6 gap-5">
       <h1 className="font-monts font-bold text-lg text-darkerGray underline">
