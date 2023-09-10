@@ -73,7 +73,9 @@ export default function Dashboard() {
 
       //Filtered logs also
       const filteredLogs = logs.filter(
-        (log) => new Date(log.timestamp).getFullYear() == parseInt(selectedYear)
+        (log) =>
+          new Date(log.timestamp).getFullYear() == parseInt(selectedYear) &&
+          log.author_id == data.acd_id
       );
       setFilteredLogs(filteredLogs);
     }
@@ -135,10 +137,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (logs.length != 0 && data != null) {
-      const _logs = logs.filter((log) => log.author_id == data.acd_id);
+      const _logs = logs.filter((log) => log.author_type == "acd");
 
       const accomplished = _logs.filter((log) =>
-        log.action.includes("Accomplished")
+        log.action.includes("Accomplished") || log.action.includes("Cancelled")
       ).length;
       const missed = _logs.filter((log) =>
         log.action.includes("Missed")
@@ -413,7 +415,9 @@ export default function Dashboard() {
                         {row.inspection_mode}
                       </h3>
                       <h3 className=" col-span-2 font-monts font-semibold text-sm text-center text-darkerGray px-4">
-                        {row.inspection_task}
+                        {
+                          row.inspection_task.replace(/<[^>]+>/g, "").trim() //Removes <>
+                        }
                       </h3>
                       <h3 className=" col-span-1 font-monts font-semibold text-sm text-center text-darkerGray px-4">
                         {row.inspection_date}

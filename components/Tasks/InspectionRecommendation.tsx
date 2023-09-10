@@ -48,7 +48,9 @@ export default function InspectionRecommendation({
       <div className="flex flex-col gap-2">
         <p className="font-monts text-sm text-darkerGray font-normal">
           The inspection date is at:{` `}
-          <span className="font-bold">{inspectionData.inspection_date}</span>
+          <span className="font-bold">
+            {formatDate(inspectionData.inspection_date)}
+          </span>
         </p>
         <p className="font-monts text-sm text-darkerGray font-normal">
           Regional Office (RO):{` `}
@@ -84,7 +86,7 @@ export default function InspectionRecommendation({
               <Spinner />
             </>
           ) : (
-            <>No, don&apos;t recommend</>
+            <> No, don&apos;t recommend</>
           )}
         </button>
         <button
@@ -97,7 +99,7 @@ export default function InspectionRecommendation({
               <Spinner />
             </>
           ) : (
-            <>Yes, recommend the set time and date</>
+            <> Yes, recommend the set time and date</>
           )}
         </button>
       </div>

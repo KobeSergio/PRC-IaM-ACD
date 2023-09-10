@@ -18,7 +18,6 @@ import { useSession } from "next-auth/react";
 const firebase = new Firebase();
 
 export default function Page({ params }: { params: { id: string } }) {
-  const [showEditInspectionModal, setShowEditInspectionModal] = useState(false);
   const [showCancellationModal, setShowCancellationModal] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,65 +42,17 @@ export default function Page({ params }: { params: { id: string } }) {
     }
   }, [params.id]);
 
-  const handleCloseEditInspection = () => {
-    setShowEditInspectionModal(false);
-  };
-
-  const handleSubmitEditClient = async (new_client_details: Client) => {
-    //insert logic here
-    setIsLoading(true);
-
-    await firebase.updateClient(new_client_details).then(() => {
-      setInspectionData({
-        ...inspectionData,
-        client_details: new_client_details,
-      });
-    });
-
-    setShowEditInspectionModal(false);
-    setIsLoading(false);
-  };
-
-  const handleCloseCancellationRequest = () => {
-    setShowCancellationModal(false);
-  };
-
-  const handleSubmitCancellationRequest = () => {
-    //insert logic here
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setShowCancellationModal(false);
-      setIsLoading(false);
-    }, 2000);
-  };
-
-  const handleCloseReschedulingRequest = () => {
-    setShowRescheduleModal(false);
-  };
-
-  const handleSubmitReschedulingRequest = () => {
-    //insert logic here
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setShowRescheduleModal(false);
-      setIsLoading(false);
-    }, 2000);
-  };
-
   const handleScheduleApproval = async (decision: number, remarks: string) => {
     if ((decision == 1 || decision == 0) && remarks == "")
       return alert("Please fill out all fields.");
 
     if (
-      confirm(
+      !confirm(
         `Are you sure you want to ${
           decision == 0 ? "not recommend" : "recommend"
         } this inspection forward?`
-      ) == undefined
+      )
     ) {
-      console.log("first");
       return;
     }
 
@@ -150,17 +101,73 @@ export default function Page({ params }: { params: { id: string } }) {
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    const body = document.querySelector("body");
-    if (body) {
-      // null check added here
-      if (showEditInspectionModal) {
-        body.style.overflow = "hidden"; // Disable scrolling
-      } else {
-        body.style.overflow = "auto"; // Enable scrolling
-      }
+  const handleCancellationRecommendation = async (
+    decision: number,
+    remarks: string
+  ) => {
+    if ((decision == 1 || decision == 0) && remarks == "")
+      return alert("Please fill out all fields.");
+
+    if (
+      !confirm(
+        `Are you sure you want to ${
+          decision == 0 ? "not recommend" : "recommend"
+        } this inspection cancellation?`
+      )
+    ) {
+      return;
     }
-  }, [showEditInspectionModal]);
+
+    setIsLoading(true);
+
+    let inspection: Inspection = {} as Inspection;
+    let log: Log = {} as Log;
+
+    if (decision == 0) {
+      //Continue with the inspection
+      //Previous inspection_task
+      const previousInspectionTask = inspectionData.inspection_task
+        .split("<")[1]
+        .split("/")[2]
+        .replace(">", "");
+
+      inspection = {
+        ...inspectionData,
+        inspection_task: previousInspectionTask,
+      };
+
+      log = {
+        log_id: "",
+        timestamp: new Date().toLocaleString(),
+        client_details: inspectionData.client_details as Client,
+        author_details: inspectionData.acd_details,
+        action: "Cancelled inspection recommendation",
+        author_type: "",
+        author_id: "",
+      };
+    } else if (decision == 1) {
+      //Send inspection cancellation to OC approval
+      inspection = {
+        ...inspectionData,
+        inspection_task: "For inspection approval",
+      };
+
+      log = {
+        log_id: "",
+        timestamp: new Date().toLocaleString(),
+        client_details: inspectionData.client_details as Client,
+        author_details: inspectionData.acd_details,
+        action: "Accomplished inspection recommendation",
+        author_type: "",
+        author_id: "",
+      };
+    }
+
+    await firebase.createLog(log, data.acd_id);
+    await firebase.updateInspection(inspection);
+    setInspectionData(inspection);
+    setIsLoading(false);
+  };
 
   if (Object.keys(inspectionData).length == 0) return <></>;
 
@@ -174,22 +181,10 @@ export default function Page({ params }: { params: { id: string } }) {
     },
   ];
 
-  const task = inspectionData.inspection_task.toLowerCase();
+  const task = inspectionData.inspection_task?.toLowerCase();
 
   return (
     <>
-      <CancellationRequest
-        isOpen={showCancellationModal}
-        setter={handleCloseCancellationRequest}
-        isLoading={isLoading}
-        onSubmit={handleSubmitCancellationRequest}
-      />
-      <ReschedulingRequest
-        isOpen={showRescheduleModal}
-        setter={handleCloseReschedulingRequest}
-        isLoading={isLoading}
-        onSubmit={handleSubmitReschedulingRequest}
-      />
       <div className="min-h-[75vh] w-full flex flex-col gap-5">
         <Breadcrumbs items={breadcrumbItems} />
         <div className="w-full bg-white border border-[#D5D7D8] flex flex-col rounded-[10px] p-6 gap-2">
@@ -276,8 +271,12 @@ export default function Page({ params }: { params: { id: string } }) {
             decision={handleScheduleApproval}
             isLoading={isLoading}
           />
-        ) : task.includes("inspection cancellation") ? (
-          <InspectionCancellation />
+        ) : task.includes("cancellation recommendation") ? (
+          <InspectionCancellation
+            inspectionData={inspectionData}
+            decision={handleCancellationRecommendation}
+            isLoading={isLoading}
+          />
         ) : task.includes("coc") ? (
           <COCUpload />
         ) : task.includes("to") ? (

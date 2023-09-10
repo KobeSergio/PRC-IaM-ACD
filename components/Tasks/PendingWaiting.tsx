@@ -8,6 +8,15 @@ export default function PendingWaiting({ task }: any) {
       "Inspection schedule is being settled for an inspection date by PRB and RO";
   }
 
+  if (task.toLowerCase().includes("cancellation approval")) {
+    taskContent = "Waiting for the cancellation request to be approved";
+  }
+  
+
+  if (task.toLowerCase().includes("nim")) {
+    taskContent = "Waiting for the NIM to be sent by PRB to the client";
+  }
+
   if (task.toLowerCase().includes("inspection approval")) {
     taskContent = "Inspection is being reviewed by OC";
   }

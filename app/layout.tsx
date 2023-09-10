@@ -22,16 +22,9 @@ export const InspectionProvider: React.FC<InspectionProviderProps> = ({
   children,
 }) => {
   //Declare contexts here (Inspections and acd from local storage)
-  const [acd, setACD] = useState("");
   const [inspections, setInspections] = useState<Inspection[]>([]);
 
   useEffect(() => {
-    const acd = localStorage.getItem("acd");
-    if (acd) {
-      setACD(JSON.parse(acd));
-    }
-
-    console.log(inspections.length);
     if (inspections.length == 0) {
       firebase
         .getAllInspections()
@@ -45,7 +38,7 @@ export const InspectionProvider: React.FC<InspectionProviderProps> = ({
   }, []);
 
   return (
-    <InspectionContext.Provider value={{ acd, inspections, setInspections }}>
+    <InspectionContext.Provider value={{ inspections, setInspections }}>
       {children}
     </InspectionContext.Provider>
   );
