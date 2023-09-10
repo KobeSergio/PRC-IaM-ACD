@@ -17,9 +17,7 @@ import { Log } from "@/types/Log";
 import { useSession } from "next-auth/react";
 const firebase = new Firebase();
 
-export default function Page({ params }: { params: { id: string } }) {
-  const [showCancellationModal, setShowCancellationModal] = useState(false);
-  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+export default function Page({ params }: { params: { id: string } }) { 
   const [isLoading, setIsLoading] = useState(false);
 
   const { data }: any = useSession();
@@ -141,7 +139,7 @@ export default function Page({ params }: { params: { id: string } }) {
         timestamp: new Date().toLocaleString(),
         client_details: inspectionData.client_details as Client,
         author_details: inspectionData.acd_details,
-        action: "Cancelled inspection recommendation",
+        action: "Cancelled cancellation recommendation",
         author_type: "",
         author_id: "",
       };
@@ -149,7 +147,10 @@ export default function Page({ params }: { params: { id: string } }) {
       //Send inspection cancellation to OC approval
       inspection = {
         ...inspectionData,
-        inspection_task: "For inspection approval",
+        inspection_task: `For cancellation approval <${inspectionData.inspection_task
+          .split("<")[1]
+          .replace(">", "")
+          .trim()}>`,
       };
 
       log = {
@@ -157,7 +158,7 @@ export default function Page({ params }: { params: { id: string } }) {
         timestamp: new Date().toLocaleString(),
         client_details: inspectionData.client_details as Client,
         author_details: inspectionData.acd_details,
-        action: "Accomplished inspection recommendation",
+        action: "Accomplished cancellation recommendation",
         author_type: "",
         author_id: "",
       };

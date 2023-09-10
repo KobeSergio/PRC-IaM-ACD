@@ -1,5 +1,6 @@
 import { Inspection } from "@/types/Inspection";
 import React, { useState } from "react";
+import { Spinner } from "../Spinner";
 
 export default function InspectionCancellation({
   inspectionData,
@@ -58,14 +59,26 @@ export default function InspectionCancellation({
           type="button"
           className="w-full md:w-fit flex items-center justify-center gap-2 cursor-pointer text-gray border bg-[#973C3C] border-[#973C3C] rounded-lg font-monts font-semibold text-sm text-white h-fit p-2.5"
         >
-          No, don&apos;t recommend
+          {isLoading ? (
+            <>
+              <Spinner />
+            </>
+          ) : (
+            <> No, don&apos;t recommend</>
+          )}
         </button>
         <button
           onClick={() => decision(1, remarks)}
           type="button"
           className="w-full md:w-fit flex items-center justify-center gap-2 cursor-pointer text-gray border bg-primaryBlue border-primaryBlue rounded-lg font-monts font-semibold text-sm text-white h-fit p-2.5"
         >
-          Yes, recommend the cancellation request{" "}
+          {isLoading ? (
+            <>
+              <Spinner />
+            </>
+          ) : (
+            <>Yes, recommend the cancellation request</>
+          )}
         </button>
       </div>
     </div>
