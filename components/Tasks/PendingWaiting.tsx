@@ -11,7 +11,6 @@ export default function PendingWaiting({ task }: any) {
   if (task.toLowerCase().includes("cancellation approval")) {
     taskContent = "Waiting for the cancellation request to be approved";
   }
-  
 
   if (task.toLowerCase().includes("nim")) {
     taskContent = "Waiting for the NIM to be sent by PRB to the client";
@@ -23,6 +22,10 @@ export default function PendingWaiting({ task }: any) {
 
   if (task.toLowerCase().includes("waiting requirements")) {
     taskContent = "Waiting for the requirements from the client";
+  }
+
+  if (task.toLowerCase().includes("cancelled")) {
+    taskContent = "Inspection has been cancelled";
   }
 
   return (

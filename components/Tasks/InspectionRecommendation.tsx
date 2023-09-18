@@ -99,7 +99,7 @@ export default function InspectionRecommendation({
               <Spinner />
             </>
           ) : (
-            <> Yes, recommend the set time and date</>
+            <> Yes, recommend the inspection to the OC</>
           )}
         </button>
       </div>

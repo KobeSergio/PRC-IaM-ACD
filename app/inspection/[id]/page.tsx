@@ -17,7 +17,7 @@ import { Log } from "@/types/Log";
 import { useSession } from "next-auth/react";
 const firebase = new Firebase();
 
-export default function Page({ params }: { params: { id: string } }) { 
+export default function Page({ params }: { params: { id: string } }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const { data }: any = useSession();
@@ -79,7 +79,9 @@ export default function Page({ params }: { params: { id: string } }) {
       //Send inspection to OC approval
       inspection = {
         ...inspectionData,
-        inspection_task: "For inspection approval",
+        inspection_task: `For inspection approval <${formatDateToDash(
+          new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+        )}>`,
       };
 
       log = {
@@ -150,7 +152,9 @@ export default function Page({ params }: { params: { id: string } }) {
         inspection_task: `For cancellation approval <${inspectionData.inspection_task
           .split("<")[1]
           .replace(">", "")
-          .trim()}>`,
+          .trim()}/${formatDateToDash(
+          new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+        )}>`,
       };
 
       log = {
@@ -288,4 +292,11 @@ export default function Page({ params }: { params: { id: string } }) {
       </div>
     </>
   );
+}
+
+function formatDateToDash(dateObj: Date) {
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  return `${year}-${day}-${month}`;
 }
