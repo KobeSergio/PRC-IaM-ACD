@@ -174,6 +174,27 @@ export default function Page({ params }: { params: { id: string } }) {
     setIsLoading(false);
   };
 
+  const handleSubmittedTO = async () => {
+    const inspection: Inspection = {
+      ...inspectionData,
+      inspection_task: "For COC, IMAT, IMWPR",
+    };
+
+    const log: Log = {
+      log_id: "",
+      timestamp: new Date().toLocaleString(),
+      client_details: inspectionData.client_details as Client,
+      author_details: inspectionData.acd_details,
+      action: "Submitted travel order",
+      author_type: "",
+      author_id: "",
+    };
+
+    await firebase.createLog(log, data.acd_id);
+    await firebase.updateInspection(inspection);
+    setInspectionData(inspection);
+  };
+
   if (Object.keys(inspectionData).length == 0) return <></>;
 
   const breadcrumbItems = [
@@ -262,7 +283,14 @@ export default function Page({ params }: { params: { id: string } }) {
             <div className="flex w-full justify-end">
               <h6 className="font-monts text-sm font-semibold text-darkerGray">
                 Travel/Office Order No.:{" "}
-                <span className="text-primaryBlue">#92152613734734</span>
+                <a
+                  className="text-primaryBlue"
+                  href={inspectionData.inspection_TO}
+                  target="_blank"
+                >
+                  #
+                  {extractFilenameFromFirebaseURL(inspectionData.inspection_TO)}
+                </a>
               </h6>
             </div>
           )}
@@ -284,8 +312,11 @@ export default function Page({ params }: { params: { id: string } }) {
           />
         ) : task.includes("coc") ? (
           <COCUpload />
-        ) : task.includes("to") ? (
-          <TOUpload />
+        ) : task.includes("for to") ? (
+          <TOUpload
+            inspection_id={inspectionData.inspection_id}
+            handleSubmittedTO={handleSubmittedTO}
+          />
         ) : (
           <PendingWaiting task={task} />
         )}
@@ -299,4 +330,20 @@ function formatDateToDash(dateObj: Date) {
   const month = String(dateObj.getMonth() + 1).padStart(2, "0"); // Months are 0-based
   const day = String(dateObj.getDate()).padStart(2, "0");
   return `${year}-${day}-${month}`;
+}
+
+function extractFilenameFromFirebaseURL(url: string): string {
+  // Decode the URL to convert %2F to /
+  const decodedURL = decodeURIComponent(url);
+
+  // Find the last occurrence of /
+  const lastSlashIndex = decodedURL.lastIndexOf("/");
+
+  // Find the start of the query parameters
+  const queryStartIndex = decodedURL.indexOf("?", lastSlashIndex);
+
+  // Extract the filename and remove the last character which is a }
+  const filename = decodedURL.substring(lastSlashIndex + 1, queryStartIndex);
+
+  return filename.split(".")[0];
 }
