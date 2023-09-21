@@ -15,6 +15,7 @@ import { PRB } from "@/types/PRB";
 import { Log } from "@/types/Log";
 import { Inspection } from "@/types/Inspection";
 import { useSession } from "next-auth/react";
+import { formatDateToYYYYMMDD } from "@/lib/formatDates";
 ChartJS.register(ArcElement);
 
 export default function Dashboard() {
@@ -476,12 +477,4 @@ export default function Dashboard() {
       </div>
     </>
   );
-}
-
-function formatDateToYYYYMMDD(date: Date) {
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based, so +1 and pad with a leading 0 if necessary
-  const dd = String(date.getDate()).padStart(2, "0"); // Pad with a leading 0 if necessary
-
-  return `${yyyy}-${mm}-${dd}`;
 }

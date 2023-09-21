@@ -15,6 +15,8 @@ import COCUpload from "@/components/Tasks/COCUpload";
 import TOUpload from "@/components/Tasks/TOUpload";
 import { Log } from "@/types/Log";
 import { useSession } from "next-auth/react";
+import { extractFilenameFromFirebaseURL } from "@/lib/filenameExtractor";
+import { formatDateToDash } from "@/lib/formatDates";
 const firebase = new Firebase();
 
 export default function Page({ params }: { params: { id: string } }) {
@@ -323,27 +325,4 @@ export default function Page({ params }: { params: { id: string } }) {
       </div>
     </>
   );
-}
-
-function formatDateToDash(dateObj: Date) {
-  const year = dateObj.getFullYear();
-  const month = String(dateObj.getMonth() + 1).padStart(2, "0"); // Months are 0-based
-  const day = String(dateObj.getDate()).padStart(2, "0");
-  return `${year}-${day}-${month}`;
-}
-
-function extractFilenameFromFirebaseURL(url: string): string {
-  // Decode the URL to convert %2F to /
-  const decodedURL = decodeURIComponent(url);
-
-  // Find the last occurrence of /
-  const lastSlashIndex = decodedURL.lastIndexOf("/");
-
-  // Find the start of the query parameters
-  const queryStartIndex = decodedURL.indexOf("?", lastSlashIndex);
-
-  // Extract the filename and remove the last character which is a }
-  const filename = decodedURL.substring(lastSlashIndex + 1, queryStartIndex);
-
-  return filename.split(".")[0];
 }
