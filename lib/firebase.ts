@@ -587,7 +587,7 @@ export default class Firebase {
 
   //Storage: Uploads the uploadTravelOrder to the storage bucket
   async uploadTravelOrder(file: File, inspection_id: string) {
-    const storageRef = ref(storage, `files/${inspection_id}/${file.name}`);
+    const storageRef = ref(storage, `files/${inspection_id}/to-${file.name}`);
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     // Wrap the uploadTask inside a new Promise
@@ -610,6 +610,43 @@ export default class Firebase {
                 inspectionDoc,
                 {
                   inspection_TO: downloadURL,
+                },
+                { merge: true }
+              );
+
+              resolve(); // Resolve the promise once the upload and update are done
+            }
+          );
+        }
+      );
+    });
+  }
+  //Storage: Uploads the COC to the storage bucket
+  async uploadCOC(file: File, inspection_id: string) {
+    const storageRef = ref(storage, `files/${inspection_id}/coc-${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    // Wrap the uploadTask inside a new Promise
+    await new Promise<void>((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {},
+        (error) => {
+          alert(`${error} - Failed to upload file.`);
+          reject(error); // Reject the promise on error
+        },
+        async () => {
+          await getDownloadURL(uploadTask.snapshot.ref).then(
+            async (downloadURL) => {
+              // Fetch the current document
+              const inspectionDoc = doc(db, "inspections", inspection_id);
+
+              // Update the document with the new array
+              await setDoc(
+                inspectionDoc,
+                {
+                  inspection_COC: downloadURL,
+                  fulfilledAt: new Date().toLocaleString(),
                 },
                 { merge: true }
               );

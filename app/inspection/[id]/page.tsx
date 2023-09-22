@@ -17,6 +17,8 @@ import { Log } from "@/types/Log";
 import { useSession } from "next-auth/react";
 import { extractFilenameFromFirebaseURL } from "@/lib/filenameExtractor";
 import { formatDateToDash } from "@/lib/formatDates";
+import { inspect } from "util";
+import InspectionSummary from "@/components/Tasks/InspectionSummary";
 const firebase = new Firebase();
 
 export default function Page({ params }: { params: { id: string } }) {
@@ -197,6 +199,25 @@ export default function Page({ params }: { params: { id: string } }) {
     setInspectionData(inspection);
   };
 
+  const handleSubmittedCOC = async () => {
+    const newInspection = await firebase.getInspection(
+      inspectionData.inspection_id
+    );
+
+    const log: Log = {
+      log_id: "",
+      timestamp: new Date().toLocaleString(),
+      client_details: inspectionData.client_details as Client,
+      author_details: inspectionData.acd_details,
+      action: "Submitted Certificate of Compliance",
+      author_type: "",
+      author_id: "",
+    };
+
+    await firebase.createLog(log, data.acd_id);
+    setInspectionData(newInspection as Inspection);
+  };
+
   if (Object.keys(inspectionData).length == 0) return <></>;
 
   const breadcrumbItems = [
@@ -267,7 +288,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 Date Issued
               </h6>
               <p className="font-monts text-sm font-semibold text-darkerGray">
-                {inspectionData.createdAt}
+                {formatDateToDash(new Date(inspectionData.createdAt))}
               </p>
             </div>
             <div className="flex flex-col gap-1">
@@ -281,8 +302,8 @@ export default function Page({ params }: { params: { id: string } }) {
               </p>
             </div>
           </div>
-          {inspectionData.inspection_TO !== "" && (
-            <div className="flex w-full justify-end">
+          <div className="flex w-full justify-between mt-4">
+            {inspectionData.inspection_TO !== "" && (
               <h6 className="font-monts text-sm font-semibold text-darkerGray">
                 Travel/Office Order No.:{" "}
                 <a
@@ -294,12 +315,29 @@ export default function Page({ params }: { params: { id: string } }) {
                   {extractFilenameFromFirebaseURL(inspectionData.inspection_TO)}
                 </a>
               </h6>
-            </div>
-          )}
+            )}
+            {inspectionData.inspection_COC !== "" && (
+              <a
+                href={inspectionData.inspection_COC}
+                target="_blank"
+                className="font-monts text-sm font-semibold text-primaryBlue underline"
+              >
+                Certificate of Compliance is valid until{" "}
+                {
+                  //Add 5 years to the fulfilledAt date
+                  formatDateToDash(
+                    new Date(
+                      new Date(inspectionData.fulfilledAt).setFullYear(
+                        new Date(inspectionData.fulfilledAt).getFullYear() + 5
+                      )
+                    )
+                  )
+                }
+              </a>
+            )}
+          </div>
         </div>
-
         {/* If inspection data is scheduling and if a cancellation/rescheduling request is already ongoing, dont show the btns */}
-
         {task.includes("inspection recommendation") ? (
           <InspectionRecommendation
             inspectionData={inspectionData}
@@ -312,13 +350,25 @@ export default function Page({ params }: { params: { id: string } }) {
             decision={handleCancellationRecommendation}
             isLoading={isLoading}
           />
-        ) : task.includes("coc") ? (
-          <COCUpload />
+        ) : new Date().getTime() -
+            new Date(inspectionData.inspection_date).getTime() >=
+            0 &&
+          task.includes("finished") &&
+          inspectionData.status.toLowerCase().includes("compliant") &&
+          inspectionData.inspection_COC == "" ? (
+          <COCUpload
+            inspection_id={inspectionData.inspection_id}
+            handleSubmittedCOC={handleSubmittedCOC}
+          />
         ) : task.includes("for to") ? (
           <TOUpload
             inspection_id={inspectionData.inspection_id}
             handleSubmittedTO={handleSubmittedTO}
           />
+        ) : task.includes("finished") ? (
+          <>
+            <InspectionSummary inspectionDetails={inspectionData} />
+          </>
         ) : (
           <PendingWaiting task={task} />
         )}
