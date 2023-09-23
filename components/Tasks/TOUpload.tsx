@@ -51,7 +51,7 @@ export default function TOUpload({
   };
 
   return (
-    <div className="h-full bg-white border border-[#D5D7D8] flex flex-col rounded-[10px] p-6 gap-5">
+    <div className="h-full w-full bg-white border border-[#D5D7D8] flex flex-col rounded-[10px] p-6 gap-5">
       <h1 className="font-monts font-bold text-lg text-darkerGray underline">
         Upload Travel/Office Order
       </h1>

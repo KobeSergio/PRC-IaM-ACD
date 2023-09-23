@@ -17,7 +17,7 @@ export default function IMATVS({
   VSDetails: string;
 }) {
   return (
-    <div className="h-full bg-white border border-[#D5D7D8] flex flex-col rounded-[10px] p-6 gap-6">
+    <div className="h-full w-full bg-white border border-[#D5D7D8] flex flex-col rounded-[10px] p-6 gap-6">
       <h1 className="font-monts font-bold text-lg text-darkerGray underline">
         INSPECTION AND MONITORING ADMINISTRATIVE TOOL (IMAT) & Verification
         Statement (VS)

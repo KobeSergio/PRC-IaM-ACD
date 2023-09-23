@@ -10,10 +10,16 @@ import { BsFunnel, BsCalendar3, BsPlusLg, BsList } from "react-icons/bs";
 import FilterModal from "@/components/Modals/InspectionCalendar/FilterModal";
 ChartJS.register(ArcElement);
 
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid"; // a plugin!
+import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClick
 import { useInspections } from "@/contexts/InspectionContext";
 import { Inspection } from "@/types/Inspection";
+import { useRouter } from "next/navigation";
 
 export default function InspectionCalendar() {
+  const { push } = useRouter();
+
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -191,6 +197,11 @@ export default function InspectionCalendar() {
     }
   }, [showFilterModal]);
 
+  //Calendar handler
+  const handleEventClick = (arg: any) => {
+    push("/inspection/" + arg.event.id);
+  };
+
   return (
     <>
       <FilterModal
@@ -262,7 +273,25 @@ export default function InspectionCalendar() {
                 </button>
               </div>
             </div>
-            <div>insert calendar here</div>
+            <div className="bg-white p-4 rounded-lg">
+              <FullCalendar
+                plugins={[dayGridPlugin, interactionPlugin]}
+                viewClassNames={["font-monts font-semibold text-sm"]}
+                eventClassNames={["px-2 cursor-pointer "]}
+                weekNumberClassNames={["font-monts font-semibold text-sm"]}
+                initialView="dayGridMonth"
+                eventClick={handleEventClick}
+                selectable={true}
+                events={filteredInspections.map((inspection: Inspection) => {
+                  return {
+                    title: inspection.client_details.name,
+                    date: inspection.inspection_date,
+                    id: inspection.inspection_id,
+                    allDay: true,
+                  };
+                })}
+              />
+            </div>
           </div>
         ) : (
           // List Section
