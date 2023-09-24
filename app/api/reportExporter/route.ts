@@ -3,6 +3,7 @@
 import { PDFDocument } from "pdf-lib";
 import { NextResponse } from "next/server";
 import { readFile, readFileSync } from "fs";
+import { Inspection } from "@/types/Inspection";
 
 export async function POST(req: Request) {
   if (req.method === "POST") {
@@ -10,7 +11,9 @@ export async function POST(req: Request) {
     const _inspections = formData.get("inspections"); // stringified JSON
     const _annex = formData.get("annex");
 
-    const inspections = JSON.parse(_inspections as string);
+    const inspections: Inspection[] = JSON.parse(_inspections as string);
+
+    console.log(inspections);
     const annex = _annex as string;
 
     try {
@@ -20,18 +23,47 @@ export async function POST(req: Request) {
 
       const form = pdfDoc.getForm();
 
-      const possibleFields = Array.from(
-        { length: pdfDoc.getForm().getFields().length },
-        (_, i) => i + 1
-      );
+      if (annex.toUpperCase() === "J") {
+        //Name, Date, Findings, Date of monitoring, status
+        inspections.map((inspection: Inspection, index: number) => {
+          const estName = inspection.client_details.name;
+          const inspection_date = inspection.inspection_date;
+          const findings = inspection.inspection_IMWPR.other_comments;
+          const recommendations = inspection.inspection_IMWPR.recommendations;
+          const agreedCompliance =
+            inspection.inspection_IMWPR.compliance_decision; //To follow
+          const status = inspection.status;
 
-      possibleFields.forEach((field) => {
-        try {
-          form.getTextField(`Text${field}`).setText(field.toString());
-        } catch (error) {
-          console.log(error);
-        }
-      });
+          const baseIndex = index * 6 + 1;
+
+          form.getTextField(`Text${baseIndex}`).setText(estName); //Name
+          form.getTextField(`Text${baseIndex + 1}`).setText(inspection_date); //Date
+          form.getTextField(`Text${baseIndex + 2}`).setText(findings); //Findings
+          form.getTextField(`Text${baseIndex + 3}`).setText(""); //Date of monitoring
+          form.getTextField(`Text${baseIndex + 4}`).setText(status); //Status
+          form.getTextField(`Text${baseIndex + 5}`).setText(""); //Outcome
+        });
+      } else if (annex.toUpperCase() === "H") {
+        //Name, Date, Findings, Agreed date of compliance, date of submission of proofs of compliance, remarks
+        inspections.map((inspection: Inspection, index: number) => {
+          const estName = inspection.client_details.name;
+          const inspection_date = inspection.inspection_date;
+          const findings = inspection.inspection_IMWPR.other_comments;
+          const recommendations = inspection.inspection_IMWPR.recommendations;
+          const agreedCompliance =
+            inspection.inspection_IMWPR.compliance_decision; //To follow
+          const status = inspection.status;
+
+          const baseIndex = index * 6 + 1;
+
+          form.getTextField(`Text${baseIndex }`).setText(estName); //Name
+          form.getTextField(`Text${baseIndex + 1}`).setText(inspection_date); //Date
+          form.getTextField(`Text${baseIndex + 2}`).setText(findings); //Findings
+          form.getTextField(`Text${baseIndex + 3}`).setText(""); //Agreed date of compliance
+          form.getTextField(`Text${baseIndex + 4}`).setText(""); //Date of submission of proofs of compliance
+          form.getTextField(`Text${baseIndex + 5}`).setText(recommendations); //Remarks
+        });
+      }
 
       const pdfBytes = await pdfDoc.save();
 

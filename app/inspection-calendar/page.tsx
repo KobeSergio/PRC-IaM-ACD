@@ -6,7 +6,13 @@ import { useState, useEffect } from "react";
 import { Chart as ChartJS, ArcElement } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import { RiArrowDownSFill, RiSearchLine } from "react-icons/ri";
-import { BsFunnel, BsCalendar3, BsPlusLg, BsList } from "react-icons/bs";
+import {
+  BsFunnel,
+  BsCalendar3,
+  BsPlusLg,
+  BsList,
+  BsDownload,
+} from "react-icons/bs";
 import FilterModal from "@/components/Modals/InspectionCalendar/FilterModal";
 ChartJS.register(ArcElement);
 
@@ -200,6 +206,56 @@ export default function InspectionCalendar() {
   //Calendar handler
   const handleEventClick = (arg: any) => {
     push("/inspection/" + arg.event.id);
+  };
+
+  const generateReport = async () => {
+    if (filteredInspections.length == 0) {
+      alert("No inspections to export");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("inspections", JSON.stringify(filteredInspections));
+      formData.append("annex", "H");
+      const response1 = await fetch("/api/reportExporter", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response1.ok)
+        throw new Error("Network response was not ok" + response1.statusText);
+
+      const blob1 = await response1.blob();
+
+      const link1 = document.createElement("a");
+      link1.href = window.URL.createObjectURL(blob1);
+      link1.download = "reportH.pdf";
+      link1.click();
+
+      const formData2 = new FormData();
+      formData2.append("inspections", JSON.stringify(filteredInspections));
+      formData2.append("annex", "J");
+      const response2 = await fetch("/api/reportExporter", {
+        method: "POST",
+        body: formData2,
+      });
+
+      if (!response2.ok)
+        throw new Error("Network response was not ok" + response2.statusText);
+
+      const blob2 = await response2.blob();
+
+      const link2 = document.createElement("a");
+      link2.href = window.URL.createObjectURL(blob2);
+      link2.download = "reportJ.pdf";
+      link2.click();
+    } catch (error) {
+      console.error(
+        "There has been a problem with your fetch operation:",
+        error
+      );
+    }
   };
 
   return (
@@ -419,6 +475,14 @@ export default function InspectionCalendar() {
                 </div>
               </div>
               <div className="w-full max-lg:justify-center justify-end flex flex-col md:flex-row gap-3">
+                <button
+                  type="button"
+                  className="w-full lg:w-fit flex items-center justify-center gap-2 cursor-pointer text-gray border bg-white border-primaryBlue rounded-lg font-monts font-semibold text-sm text-primaryBlue h-fit p-2.5"
+                  onClick={() => generateReport()}
+                >
+                  Export Report
+                  <BsDownload className="flex w-4 h-4 object-contain fill-primaryBlue" />
+                </button>
                 <button
                   type="button"
                   className="w-full lg:w-fit flex items-center justify-center gap-2 cursor-pointer text-gray border bg-white border-primaryBlue rounded-lg font-monts font-semibold text-sm text-primaryBlue h-fit p-2.5"
