@@ -1,5 +1,6 @@
 import { ACD } from "./ACD";
 import { Client } from "./Client";
+import { IMWPR } from "./IMWPR";
 import { OC } from "./OC";
 import { PRB } from "./PRB";
 import { RO } from "./RO";
@@ -11,7 +12,7 @@ export type Inspection = {
   inspection_mode: string;
   inspection_IMAT: string;
   inspection_VS: string;
-  inspection_IMWPR: string;
+  inspection_IMWPR: IMWPR;
   inspection_COC: string;
   inspection_TO: string;
   createdAt: string;
