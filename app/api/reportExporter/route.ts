@@ -4,6 +4,7 @@ import { PDFDocument } from "pdf-lib";
 import { NextResponse } from "next/server";
 import { readFile, readFileSync } from "fs";
 import { Inspection } from "@/types/Inspection";
+import path from "path";
 
 export async function POST(req: Request) {
   if (req.method === "POST") {
@@ -17,10 +18,11 @@ export async function POST(req: Request) {
     const annex = _annex as string;
 
     try {
-      const pdfDoc = await PDFDocument.load(
-        readFileSync(`./public/assets/pdfs/Annex${annex.toUpperCase()}.pdf`)
+      const filePath = path.resolve(
+        process.cwd(),
+        `./public/assets/pdfs/Annex${annex.toUpperCase()}.pdf`
       );
-
+      const pdfDoc = await PDFDocument.load(readFileSync(filePath)); 
       const form = pdfDoc.getForm();
 
       if (annex.toUpperCase() === "J") {
@@ -56,7 +58,7 @@ export async function POST(req: Request) {
 
           const baseIndex = index * 6 + 1;
 
-          form.getTextField(`Text${baseIndex }`).setText(estName); //Name
+          form.getTextField(`Text${baseIndex}`).setText(estName); //Name
           form.getTextField(`Text${baseIndex + 1}`).setText(inspection_date); //Date
           form.getTextField(`Text${baseIndex + 2}`).setText(findings); //Findings
           form.getTextField(`Text${baseIndex + 3}`).setText(""); //Agreed date of compliance
