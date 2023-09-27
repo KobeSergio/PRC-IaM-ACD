@@ -81,6 +81,8 @@ export default function RootLayout({
   const pathname = usePathname();
   return (
     <html lang="en">
+      <link rel="icon" href="/assets/icons/favicon.svg" sizes="any" />
+      <title>ACD BOND IaM</title>
       <body>
         <SessionProvider>
           <InspectionProvider>

@@ -9,16 +9,6 @@ import { useLogs } from "@/contexts/LogContext";
 import { Log } from "@/types/Log";
 
 export default function Logs() {
-  const [showModal, setShowModal] = useState(false);
-  useEffect(() => {
-    const body = document.querySelector("body");
-    if (showModal) {
-      if (body) body.style.overflow = "hidden"; // Disable scrolling
-    } else {
-      if (body) body.style.overflow = "auto"; // Enable scrolling
-    }
-  }, [showModal]);
-
   const { logs } = useLogs();
 
   const [filteredLogs, setFilteredLogs] = useState<Log[]>(logs);
@@ -87,7 +77,11 @@ export default function Logs() {
       const uniqueYears = new Set(
         logs.map((log) => new Date(log.timestamp).getFullYear())
       );
-      const uniqueYearsArray = Array.from(uniqueYears);
+
+      console.log(uniqueYears);
+      const uniqueYearsArray = Array.from(uniqueYears).filter(
+        (year) => !isNaN(year) && year !== undefined && year !== null
+      );
       setYears([...uniqueYearsArray].sort().reverse());
 
       //Get unique clients also
@@ -111,8 +105,17 @@ export default function Logs() {
           )
         );
       } else {
-        const searchFilteredLogs = filteredLogs.filter((log) =>
-          log.author_details.name.toLowerCase().includes(search.toLowerCase())
+        const searchFilteredLogs = filteredLogs.filter(
+          (log) =>
+            log.author_details?.name
+              ?.toLowerCase()
+              .includes(search.toLowerCase()) ||
+            log.author_details?.director
+              ?.toLowerCase()
+              .includes(search.toLowerCase()) ||
+            log.client_details?.name
+              .toLowerCase()
+              .includes(search.toLowerCase())
         );
         setFilteredLogs(searchFilteredLogs);
       }
@@ -181,6 +184,7 @@ export default function Logs() {
                   value={selectedClient}
                   onChange={(e) => setSelectedClient(e.target.value)}
                 >
+                  <option value={"All"}>Client: All</option>
                   {clients.map((client) => (
                     <option key={client} value={client}>
                       Client: {client}
@@ -212,7 +216,6 @@ export default function Logs() {
               </div>
             </div>
           </div>
-
           <div className="overflow-x-auto w-full h-full bg-white border border-[#D5D7D8] rounded-[10px]">
             <div className="min-w-[1068.8px] grid grid-cols-12 border-b border-[#BDBDBD] p-6">
               <h3 className="col-span-3 font-monts font-semibold text-sm text-start text-[#5C5C5C] px-4 pl-0">
@@ -228,42 +231,47 @@ export default function Logs() {
                 Action
               </h3>
             </div>
-
-            <div className="lg:overflow-y-auto w-full max-h-[25rem]">
+            <div className="overflow-y-auto w-full max-h-[60vh]">
               {filteredLogs.length == 0 ? (
-                <div>
+                <div className="h-[60vh] flex items-center justify-center">
                   <h3 className="font-monts font-medium text-base text-center text-darkerGray">
                     There are no items to display.
                   </h3>
                 </div>
               ) : (
                 <>
-                  {filteredLogs.map((row, index) => (
-                    <div
-                      key={index}
-                      className={`min-w-[1068.8px] grid grid-cols-12 p-6 ${
-                        index < filteredLogs.length - 1
-                          ? "border-b border-[#BDBDBD] "
-                          : "border-none"
-                      }  `}
-                    >
-                      <h3 className=" col-span-3 font-monts font-semibold text-sm text-darkerGray px-4 pl-0">
-                        {row.timestamp}
-                      </h3>
-                      <h3 className=" col-span-3 font-monts font-semibold text-sm text-darkerGray px-4">
-                        {row.client_details.name}
-                      </h3>
-                      <h3 className=" col-span-2 font-monts font-semibold text-sm text-start text-darkerGray px-4">
-                        {row.author_type.toUpperCase()}:{" "}
-                        {row.author_details.hasOwnProperty("name")
-                          ? row.author_details.name
-                          : row.author_details.director}
-                      </h3>
-                      <h3 className=" col-span-4 font-monts font-semibold text-sm text-start text-darkerGray px-4">
-                        {row.action}
-                      </h3>
-                    </div>
-                  ))}
+                  {filteredLogs
+                    .sort((x, y) => {
+                      return new Date(x.timestamp) < new Date(y.timestamp)
+                        ? 1
+                        : -1;
+                    })
+                    .map((row, index) => (
+                      <div
+                        key={index}
+                        className={`min-w-[1068.8px] grid grid-cols-12 p-6 ${
+                          index < filteredLogs.length - 1
+                            ? "border-b border-[#BDBDBD] "
+                            : "border-none"
+                        }  `}
+                      >
+                        <h3 className=" col-span-3 font-monts font-semibold text-sm text-darkerGray px-4 pl-0">
+                          {row.timestamp}
+                        </h3>
+                        <h3 className=" col-span-3 font-monts font-semibold text-sm text-darkerGray px-4">
+                          {row.client_details.name}
+                        </h3>
+                        <h3 className=" col-span-2 font-monts font-semibold text-sm text-start text-darkerGray px-4">
+                          {row.author_type.toUpperCase()}:{" "}
+                          {row.author_details.hasOwnProperty("name")
+                            ? row.author_details.name
+                            : row.author_details.director}
+                        </h3>
+                        <h3 className=" col-span-4 font-monts font-semibold text-sm text-start text-darkerGray px-4">
+                          {row.action}
+                        </h3>
+                      </div>
+                    ))}
                 </>
               )}
             </div>

@@ -60,6 +60,9 @@ export default function SignIn() {
       <h2 className="font-monts text-xl text-primaryBlue font-bold text-center mt-6">
         PRC INSPECTION AND MONITORING SYSTEM
       </h2>
+      <h2 className="font-monts text-lg text-primaryBlue font-bold text-center mt-3">
+        NUTRITION AND DIETETICS
+      </h2>
       <form className="max-w-lg mx-auto p-4 mt-6">
         <div className="flex items-center border-2 border-[#CED4DA] px-4 py-2 rounded-lg">
           <span>
