@@ -34,7 +34,8 @@ export default function Dashboard() {
   const [years, setYears] = useState([currentYear]);
   const defaultInspections = inspections.filter(
     (inspection) =>
-      inspection.inspection_task.includes("COC") ||
+      (inspection.inspection_task.includes("Inspection Finished") &&
+        inspection.inspection_COC == "") ||
       inspection.inspection_task.includes("TO") ||
       inspection.inspection_task.includes("inspection recommendation") ||
       inspection.inspection_task.includes("cancellation recommendation") ||
@@ -57,7 +58,8 @@ export default function Dashboard() {
       setFilteredInspections(
         inspections.filter(
           (inspection) =>
-            inspection.inspection_task.includes("COC") ||
+            (inspection.inspection_task.includes("Inspection Finished") &&
+              inspection.inspection_COC == "") ||
             inspection.inspection_task.includes("TO") ||
             inspection.inspection_task.includes("inspection recommendation") ||
             inspection.inspection_task.includes("cancellation recommendation")
@@ -93,7 +95,7 @@ export default function Dashboard() {
       const inspectionsByDate = defaultInspections.filter(
         (inspection) =>
           new Date(inspection.inspection_date).getFullYear() ==
-          parseInt(selectedYear)
+          parseInt(selectedYear) || selectedYear == "All"
       );
 
       const _cancellation = inspectionsByDate.filter((inspection) =>
@@ -105,8 +107,10 @@ export default function Dashboard() {
       const _travelOrder = inspectionsByDate.filter((inspection) =>
         inspection.inspection_task.includes("TO")
       ).length;
-      const _cocIssuance = inspectionsByDate.filter((inspection) =>
-        inspection.inspection_task.includes("COC")
+      const _cocIssuance = inspectionsByDate.filter(
+        (inspection) =>
+          inspection.inspection_task.includes("Inspection Finished") &&
+          inspection.inspection_COC == ""
       ).length;
 
       setCancellation(_cancellation);
@@ -177,7 +181,8 @@ export default function Dashboard() {
               (inspection) =>
                 new Date(inspection.inspection_date).getFullYear() ==
                   parseInt(selectedYear) &&
-                (inspection.inspection_task.includes("COC") ||
+                ((inspection.inspection_task.includes("Inspection Finished") &&
+                  inspection.inspection_COC == "") ||
                   inspection.inspection_task.includes("TO") ||
                   inspection.inspection_task.includes(
                     "inspection recommendation"

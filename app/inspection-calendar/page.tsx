@@ -208,6 +208,7 @@ export default function InspectionCalendar() {
     push("/inspection/" + arg.event.id);
   };
 
+  console.log(filteredInspections);
   const generateReport = async () => {
     if (filteredInspections.length == 0) {
       alert("No inspections to export");
@@ -215,41 +216,83 @@ export default function InspectionCalendar() {
     }
 
     try {
-      const formData = new FormData();
-      formData.append("inspections", JSON.stringify(filteredInspections));
-      formData.append("annex", "H");
-      const response1 = await fetch("/api/reportExporter", {
-        method: "POST",
-        body: formData,
+      // Define the header row of the CSV
+      const header = [
+        "Inspection_ID",
+        "Inspection_Date",
+        "Inspection_Mode",
+        "Inspection_Status",
+        "Client_ID",
+        "Client_Email",
+        "Client_Name",
+        "Client_Type",
+        "Client_Address",
+        "PRB_ID",
+        "PRB_Name",
+        "PRB_Email",
+        "RO_ID",
+        "RO_Name",
+        "RO_Email",
+        "RO_Office",
+        "ACD_ID",
+        "ACD_Name",
+        "ACD_Email",
+        "OC_ID",
+        "OC_Name",
+        "OC_Email",
+      ].join(",");
+
+      // Map over the inspections array and create a string for each row
+      const rows = inspections.map((inspection) => {
+        return [
+          `"${inspection.inspection_id}"`,
+          `"${inspection.inspection_date}"`,
+          `"${inspection.inspection_mode}"`,
+          `"${inspection.status}"`,
+          `"${inspection.client_details.client_id}"`,
+          `"${inspection.client_details.email}"`,
+          `"${inspection.client_details.name}"`,
+          `"${inspection.client_details.type}"`,
+          `"${inspection.client_details.address}"`,
+          `"${inspection.prb_details.prb_id}"`,
+          `"${inspection.prb_details.name}"`,
+          `"${inspection.prb_details.email}"`,
+          `"${inspection.ro_details.ro_id}"`,
+          `"${inspection.ro_details.director}"`,
+          `"${inspection.ro_details.email}"`,
+          `"${inspection.ro_details.office}"`,
+          `"${inspection.acd_details.acd_id}"`,
+          `"${inspection.acd_details.name}"`,
+          `"${inspection.acd_details.email}"`,
+          `"${inspection.oc_details.oc_id}"`,
+          `"${inspection.oc_details.name}"`,
+          `"${inspection.oc_details.email}"`,
+        ].join(",");
       });
 
-      if (!response1.ok)
-        throw new Error("Network response was not ok" + response1.statusText);
+      // Combine header and rows to get the full CSV string
+      const csvString = [header, ...rows].join("\n");
 
-      const blob1 = await response1.blob();
+      // Create a Blob from the CSV string
+      const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
 
-      const link1 = document.createElement("a");
-      link1.href = window.URL.createObjectURL(blob1);
-      link1.download = "reportH.pdf";
-      link1.click();
+      // Create a link element
+      const link = document.createElement("a");
 
-      const formData2 = new FormData();
-      formData2.append("inspections", JSON.stringify(filteredInspections));
-      formData2.append("annex", "J");
-      const response2 = await fetch("/api/reportExporter", {
-        method: "POST",
-        body: formData2,
-      });
+      // Set the download attribute with a filename
+      link.setAttribute("download", `${selectedYear}-inspection-reports.csv`);
 
-      if (!response2.ok)
-        throw new Error("Network response was not ok" + response2.statusText);
+      // Create a URL for the Blob and set it as the href attribute
+      link.href = URL.createObjectURL(blob);
 
-      const blob2 = await response2.blob();
+      // Append the link to the body
+      document.body.appendChild(link);
 
-      const link2 = document.createElement("a");
-      link2.href = window.URL.createObjectURL(blob2);
-      link2.download = "reportJ.pdf";
-      link2.click();
+      // Trigger the download
+      link.click();
+
+      // Remove the link from the document
+      document.body.removeChild(link);
     } catch (error) {
       console.error(
         "There has been a problem with your fetch operation:",
