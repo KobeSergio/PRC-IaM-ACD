@@ -198,7 +198,7 @@ export default function IMWPR({ IMWPRDetails }: { IMWPRDetails: IMWPR }) {
                   name={`item_compliance_forIssuance`}
                   id="compliance"
                   type="radio"
-                  checked={IMWPRDetails.compliance_decision === "compliant"}
+                  checked={IMWPRDetails.compliance_decision === "Compliant"}
                   disabled
                   className="w-4 h-4 accent-primaryBlue"
                 />
@@ -214,7 +214,7 @@ export default function IMWPR({ IMWPRDetails }: { IMWPRDetails: IMWPR }) {
                   id="monitoring"
                   type="radio"
                   checked={
-                    IMWPRDetails.compliance_decision === "for-compliance"
+                    IMWPRDetails.compliance_decision === "For-compliance"
                   }
                   disabled
                   className="w-4 h-4 accent-primaryBlue"
@@ -230,7 +230,7 @@ export default function IMWPR({ IMWPRDetails }: { IMWPRDetails: IMWPR }) {
                 <input
                   id="non-compliant"
                   type="radio"
-                  checked={IMWPRDetails.compliance_decision === "non-compliant"}
+                  checked={IMWPRDetails.compliance_decision === "Non-compliant"}
                   disabled
                   className="w-4 h-4 accent-primaryBlue"
                 />

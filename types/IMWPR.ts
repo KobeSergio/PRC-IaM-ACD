@@ -12,5 +12,5 @@ export type IMWPR = {
   findings: IMWPRContent[];
   other_comments: string;
   recommendations: string;
-  compliance_decision: "compliant" | "for-compliance" | "non-compliant";
+  compliance_decision: "Compliant" | "For-compliance" | "Non-compliant";
 };
