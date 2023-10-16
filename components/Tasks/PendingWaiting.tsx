@@ -27,12 +27,7 @@ export default function PendingWaiting({ task }: any) {
   if (task.toLowerCase().includes("cancelled")) {
     taskContent = "Inspection has been cancelled";
   }
-
-  if (task.toLowerCase().includes("coc")) {
-    taskContent =
-      "Nothing to do here. Accomplish post-inspection tasks after the inspection is done.";
-  }
-
+ 
   if (
     task.toLowerCase().includes("imwpr") ||
     task.toLowerCase().includes("imat") ||
