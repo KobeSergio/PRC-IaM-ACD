@@ -5,7 +5,7 @@ import { authOptions } from "../api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth/next";
 
 export const metadata = {
-  title: "PRC Inspection and Monitoring System",
+  title: "ACD BOND IaM",
   description: "",
 };
 

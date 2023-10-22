@@ -58,7 +58,7 @@ export default function SignIn() {
         className="w-[82px] lg:w-[120px] h-[82px] lg:h-[120px]"
       />
       <h2 className="font-monts text-xl text-primaryBlue font-bold text-center mt-6">
-        PRC INSPECTION AND MONITORING SYSTEM
+        ACD INSPECTION AND MONITORING SYSTEM
       </h2>
       <h2 className="font-monts text-lg text-primaryBlue font-bold text-center mt-3">
         NUTRITION AND DIETETICS

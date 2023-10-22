@@ -23,7 +23,7 @@ export default function Nav() {
               />
             </Link>
             <h1 className="font-monts font-semibold text-base lg:text-xl text-primaryBlue">
-              PRC Application Management System
+              ACD Inspection and Monitoring System
             </h1>
           </div>
         </div>
