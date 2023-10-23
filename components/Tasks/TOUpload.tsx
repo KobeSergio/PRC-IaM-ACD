@@ -43,9 +43,9 @@ export default function TOUpload({
 
     setIsLoading(true);
 
-    await firebase.uploadTravelOrder(file, inspection_id);
-
     await handleSubmittedTO();
+
+    await firebase.uploadTravelOrder(file, inspection_id);
 
     setIsLoading(false);
   };
