@@ -602,6 +602,7 @@ export default class Firebase {
         async () => {
           await getDownloadURL(uploadTask.snapshot.ref).then(
             async (downloadURL) => {
+              if (downloadURL === null || downloadURL === "") return;
               // Fetch the current document
               const inspectionDoc = doc(db, "inspections", inspection_id);
 
