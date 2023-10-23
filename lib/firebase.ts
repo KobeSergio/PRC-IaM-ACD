@@ -587,7 +587,7 @@ export default class Firebase {
 
   //Storage: Uploads the uploadTravelOrder to the storage bucket
   async uploadTravelOrder(file: File, inspection_id: string) {
-    const storageRef = ref(storage, `files/${inspection_id}/to-${file.name}`);
+    const storageRef = ref(storage, `files/${inspection_id}/${file.name}`);
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     // Wrap the uploadTask inside a new Promise
